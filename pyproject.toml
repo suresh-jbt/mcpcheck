@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "suresh-jbt", email = "suresh@jarvisbitz.com" }]
+authors = [{ name = "Suresh B", email = "suresh@jarvisbitz.com" }]
 keywords = ["mcp", "model-context-protocol", "conformance", "validator", "streamable-http", "json-rpc", "cli"]
 classifiers = [
   "Development Status :: 3 - Alpha",
