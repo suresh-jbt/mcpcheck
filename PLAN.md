@@ -63,7 +63,7 @@ Every question raised by the eleven sections was merged; duplicates collapsed to
 | 15 | "Use SDK `ClientSession` + `StreamableHTTPTransport`" | `ClientSession` loses HTTP status/headers (`MCPError(-32603)`), defaults omitted hints, clamps negative `ttlMs`, drops bad-header tools, cannot omit/tamper headers, and keeping a session open across anyio cancel scopes raises `RuntimeError` (reviewer-reproduced). | Raw `httpx2` client for every verdict; SDK for constants/helpers/witness only (§6.1). |
 | 16 | `--origin` default auto from URL | Spec silent on absent Origin; SDK sends none. | U8: none by default. |
 | 17 | Human output / JSON sketch | Kept where spec-correct; two header lines, counts in the final line, `warn`/`inconclusive`/`error` statuses, `failures[]`+`warnings[]`, `summary.warned/inconclusive/errored/exit_code` added. | §8; all additive to the handoff's keys (`server`, `protocol_version`, `timestamp`, `checks[].name/passed/details/failures`, `summary.total/passed/failed`). |
-| 18 | User-Agent `mcpcheck/<version> (+https://github.com/...)` | Repo URL known. | `mcpcheck/<version> (+https://github.com/suresh-jbt/mcp-check)` (changes with U7). |
+| 18 | User-Agent `mcpcheck/<version> (+https://github.com/...)` | Repo URL known. | `mcpcheck/<version> (+https://github.com/suresh-jbt/mcpcheck)` (changes with U7). |
 
 ---
 
@@ -205,7 +205,7 @@ Level: **MUST** → finding `level: must` → check `fail`; **SHOULD** → `leve
 
 ### 6.2 Package layout
 ```
-mcp-check/                                  (repo; rename → mcpcheck per U7)
+mcpcheck/                                   (repo; renamed from mcp-check per U7, done 2026-10-16)
 ├── pyproject.toml  README.md  LICENSE  CHANGELOG.md  CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md
 ├── uv.lock  .python-version  .pre-commit-config.yaml
 ├── schema/mcpcheck-report.v1.schema.json   (repo copy; identical to the shipped file, test-asserted)
@@ -265,7 +265,7 @@ Sequence for a full run: CLI validates args (exit 2 on error, no I/O) → `sdk_c
 | `MAX_ITEMS_SHOWN` | 5 | finding lines per check in human output |
 | `UNKNOWN_TOOL_NAME` | `mcpcheck__nonexistent_tool_7f3a` | deterministic (golden output, log review) |
 | `EVIL_ORIGIN` | `https://evil.example.com` | RFC 2606 name |
-| `USER_AGENT` | `mcpcheck/<ver> (+https://github.com/suresh-jbt/mcp-check)` | GROUND_TRUTH 13 |
+| `USER_AGENT` | `mcpcheck/<ver> (+https://github.com/suresh-jbt/mcpcheck)` | GROUND_TRUTH 13 |
 
 ### 6.5 `client.py`
 ```python
@@ -653,7 +653,7 @@ Accept: application/json, text/event-stream
 Content-Type: application/json
 MCP-Protocol-Version: 2026-07-28
 Mcp-Method: tools/list
-User-Agent: mcpcheck/<ver> (+https://github.com/suresh-jbt/mcp-check)
+User-Agent: mcpcheck/<ver> (+https://github.com/suresh-jbt/mcpcheck)
 Authorization: Bearer <token>        # only with --token
 Origin: <value>                      # only with --origin
 
@@ -1375,7 +1375,7 @@ Detail lines: failures then warnings, at most `MAX_ITEMS_SHOWN` unless `-v`, the
 >   mcp-protocol-version: 2026-07-28
 >   mcp-method: tools/list
 >   authorization: Bearer ****
->   user-agent: mcpcheck/0.1.0 (+https://github.com/suresh-jbt/mcp-check)
+>   user-agent: mcpcheck/0.1.0 (+https://github.com/suresh-jbt/mcpcheck)
 >   {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{…}}}
 < 1 200 application/json 48ms
 <   content-length: 612
@@ -1389,7 +1389,7 @@ Writer: `json.dumps(report.model_dump(mode="json"), indent=2, ensure_ascii=False
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "$id": "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json",
   "title": "mcpcheck report",
   "description": "Machine-readable result of one mcpcheck run (schema_version 1). Additive changes keep schema_version; removals or type changes bump it.",
   "type": "object", "additionalProperties": false,
@@ -1451,7 +1451,7 @@ The cli-output prototype of this schema (without `info`, `request`, `era`, `sdk_
 Example report (TO-FILL-FROM-REAL-RUN before README embedding; this one reflects the §8.5 table):
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json",
   "schema_version": 1, "mcpcheck_version": "0.1.0", "sdk_version": "2.3.0", "python_version": "3.13.5", "spec_revision": "2026-07-28",
   "server": "https://api.example.com/mcp",
   "request": {"origin": null, "auth": "bearer", "extra_headers": [], "tls_verify": true},
@@ -1748,11 +1748,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/suresh-jbt/mcp-check"      # ◀ U7 may rename
-Documentation = "https://github.com/suresh-jbt/mcp-check#readme"
-Repository = "https://github.com/suresh-jbt/mcp-check"
-Issues = "https://github.com/suresh-jbt/mcp-check/issues"
-Changelog = "https://github.com/suresh-jbt/mcp-check/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/suresh-jbt/mcpcheck"      # ◀ U7 may rename
+Documentation = "https://github.com/suresh-jbt/mcpcheck#readme"
+Repository = "https://github.com/suresh-jbt/mcpcheck"
+Issues = "https://github.com/suresh-jbt/mcpcheck/issues"
+Changelog = "https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md"
 
 [project.scripts]
 mcpcheck = "mcpcheck.__main__:main"
@@ -2043,7 +2043,7 @@ Dependabot: ecosystems `uv` (weekly, grouped minor/patch, cooldown 7 days, ignor
 ## 12. README and documentation
 
 ### 12.1 Rules
-Pure GFM (PyPI renders with `readme_renderer 46.0`/`comrak 0.0.16`/`nh3 0.3.7`; HTML beyond comments is stripped); every link absolute (`https://github.com/suresh-jbt/mcp-check/blob/main/...`); in-page anchors only to headings; hero = static `console` block; severity vocabulary `must`/`should`/`best-practice` (= report `level`); spec links with verified anchors (Appendix B); Origin rule linked to the transport **page** (heading id contains `&`); sentence-case headings, no TOC (< 350 lines), no emoji; placeholders carry the exact marker `TO-BE-REPLACED-WITH-REAL-RUN` inside HTML comments and `scripts/check_readme.py --release` fails while any remain. Badge row: PyPI, pyversions, CI, license, MCP-spec (five). The draft below is the readme-docs section's text with the plan's decisions applied (eight checks, `--probe safe` wording, `--legacy-probes`, tests-only reference server, `speaks` instead of `negotiated`, final-line wording, troubleshooting paragraph).
+Pure GFM (PyPI renders with `readme_renderer 46.0`/`comrak 0.0.16`/`nh3 0.3.7`; HTML beyond comments is stripped); every link absolute (`https://github.com/suresh-jbt/mcpcheck/blob/main/...`); in-page anchors only to headings; hero = static `console` block; severity vocabulary `must`/`should`/`best-practice` (= report `level`); spec links with verified anchors (Appendix B); Origin rule linked to the transport **page** (heading id contains `&`); sentence-case headings, no TOC (< 350 lines), no emoji; placeholders carry the exact marker `TO-BE-REPLACED-WITH-REAL-RUN` inside HTML comments and `scripts/check_readme.py --release` fails while any remain. Badge row: PyPI, pyversions, CI, license, MCP-spec (five). The draft below is the readme-docs section's text with the plan's decisions applied (eight checks, `--probe safe` wording, `--legacy-probes`, tests-only reference server, `speaks` instead of `negotiated`, final-line wording, troubleshooting paragraph).
 
 ### 12.2 README.md draft
 ````markdown
@@ -2051,8 +2051,8 @@ Pure GFM (PyPI renders with `readme_renderer 46.0`/`comrak 0.0.16`/`nh3 0.3.7`; 
 
 [![PyPI](https://img.shields.io/pypi/v/mcpcheck.svg)](https://pypi.org/project/mcpcheck/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mcpcheck.svg)](https://pypi.org/project/mcpcheck/)
-[![CI](https://github.com/suresh-jbt/mcp-check/actions/workflows/ci.yml/badge.svg)](https://github.com/suresh-jbt/mcp-check/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/pypi/l/mcpcheck.svg)](https://github.com/suresh-jbt/mcp-check/blob/main/LICENSE)
+[![CI](https://github.com/suresh-jbt/mcpcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/suresh-jbt/mcpcheck/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/pypi/l/mcpcheck.svg)](https://github.com/suresh-jbt/mcpcheck/blob/main/LICENSE)
 [![MCP spec 2026-07-28](https://img.shields.io/badge/MCP%20spec-2026--07--28-blue)](https://modelcontextprotocol.io/specification/2026-07-28)
 
 Check that an MCP server conforms to the **2026-07-28** revision of the [Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28) over Streamable HTTP. Read-only. Zero config. One command.
@@ -2147,7 +2147,7 @@ The human report prints one line per check with a glyph (`✓` pass, `✗` fail,
 { "schema_version": 1, "mcpcheck_version": "0.1.0", "spec_revision": "2026-07-28", "server": "https://api.example.com/mcp", "...": "..." }
 ```
 
-Finding `code`s (`cache.ttl_missing`, `schemas.input_schema_invalid`, …) are stable identifiers you can grep or suppress on. The report format is versioned by `schema_version`; the JSON Schema ships in the repository as [`schema/mcpcheck-report.v1.schema.json`](https://github.com/suresh-jbt/mcp-check/blob/main/schema/mcpcheck-report.v1.schema.json) and is printed by `mcpcheck --json-schema`. Your token is never written to the report; only `"auth": "bearer"` is.
+Finding `code`s (`cache.ttl_missing`, `schemas.input_schema_invalid`, …) are stable identifiers you can grep or suppress on. The report format is versioned by `schema_version`; the JSON Schema ships in the repository as [`schema/mcpcheck-report.v1.schema.json`](https://github.com/suresh-jbt/mcpcheck/blob/main/schema/mcpcheck-report.v1.schema.json) and is printed by `mcpcheck --json-schema`. Your token is never written to the report; only `"auth": "bearer"` is.
 
 ## Exit codes
 
@@ -2192,14 +2192,14 @@ The repository ships a small, fully conformant reference server built on the off
 
 <!-- TO-BE-REPLACED-WITH-REAL-RUN -->
 ```console
-$ git clone https://github.com/suresh-jbt/mcp-check && cd mcp-check && uv sync
+$ git clone https://github.com/suresh-jbt/mcpcheck && cd mcpcheck && uv sync
 $ uv run python -m tests.fixtures.reference_server --port 0
 mcpcheck reference server 0.1.0 listening on http://127.0.0.1:54321/mcp
 $ uv run mcpcheck http://127.0.0.1:54321/mcp
 …
 All 8 checks passed in 1.3s.
 ```
-Flags: `--port N` (0 = free port), `--json-response`, `--stateful` (dual-era), `--no-origin-check`, `--require-token TOKEN`. The suite also runs every check against a deliberately misbehaving server; see [CONTRIBUTING.md](https://github.com/suresh-jbt/mcp-check/blob/main/CONTRIBUTING.md).
+Flags: `--port N` (0 = free port), `--json-response`, `--stateful` (dual-era), `--no-origin-check`, `--require-token TOKEN`. The suite also runs every check against a deliberately misbehaving server; see [CONTRIBUTING.md](https://github.com/suresh-jbt/mcpcheck/blob/main/CONTRIBUTING.md).
 
 ## Contributing / License
 Bug reports, wrong-verdict reports (attach `--json`) and new-check proposals (must cite a clause) are welcome: [CONTRIBUTING.md](…), [SECURITY.md](…), [Contributor Covenant](…/CODE_OF_CONDUCT.md). MIT — see [LICENSE](…).

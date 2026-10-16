@@ -3,7 +3,7 @@
 #   -> publish TestPyPI -> publish PyPI (environment approval) -> GitHub Release
 # Publishing uses PyPI Trusted Publishing (OIDC): no API tokens are stored anywhere.
 # One-time setup (each index separately):
-#   https://pypi.org/manage/account/publishing/       owner=suresh-jbt repo=mcp-check workflow=release.yml environment=pypi
+#   https://pypi.org/manage/account/publishing/       owner=suresh-jbt repo=mcpcheck workflow=release.yml environment=pypi
 #   GitHub -> Settings -> Environments: create `pypi` (add yourself as a required reviewer).
 name: Release
 on:

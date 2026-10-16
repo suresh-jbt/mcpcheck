@@ -182,7 +182,7 @@ def test_links_are_absolute(path: Path) -> None:
 
 
 BANNER_PATH = "assets/banner.webp"
-BANNER_URL = f"https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/{BANNER_PATH}"
+BANNER_URL = f"https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/{BANNER_PATH}"
 
 
 def test_banner_is_the_first_thing_in_the_readme() -> None:
@@ -305,7 +305,7 @@ def test_try_it_section_runs_the_demo() -> None:
     assert "bash examples/demo.sh" in section
     assert "examples/demo_server.py" in section
     assert "--break cache,origin,output-schema" in section
-    assert "https://github.com/suresh-jbt/mcp-check/blob/main/examples/README.md" in section
+    assert "https://github.com/suresh-jbt/mcpcheck/blob/main/examples/README.md" in section
 
 
 def test_demo_section_shows_a_real_all_pass_run() -> None:

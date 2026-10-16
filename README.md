@@ -1,11 +1,11 @@
-[![mcpcheck — check MCP servers for 2026-07-28 conformance: read-only, zero config, one command](https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/assets/banner.webp)](https://github.com/suresh-jbt/mcp-check)
+[![mcpcheck — check MCP servers for 2026-07-28 conformance: read-only, zero config, one command](https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/assets/banner.webp)](https://github.com/suresh-jbt/mcpcheck)
 
 # mcpcheck
 
-[![Status: 0.1.0, not yet on PyPI](https://img.shields.io/badge/status-0.1.0%20not%20yet%20on%20PyPI-orange)](https://github.com/suresh-jbt/mcp-check/blob/main/CHANGELOG.md)
-[![Python 3.10 to 3.14](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue)](https://github.com/suresh-jbt/mcp-check/blob/main/pyproject.toml)
-[![CI](https://github.com/suresh-jbt/mcp-check/actions/workflows/ci.yml/badge.svg)](https://github.com/suresh-jbt/mcp-check/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/suresh-jbt/mcp-check/blob/main/LICENSE)
+[![Status: 0.1.0, not yet on PyPI](https://img.shields.io/badge/status-0.1.0%20not%20yet%20on%20PyPI-orange)](https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md)
+[![Python 3.10 to 3.14](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue)](https://github.com/suresh-jbt/mcpcheck/blob/main/pyproject.toml)
+[![CI](https://github.com/suresh-jbt/mcpcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/suresh-jbt/mcpcheck/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/suresh-jbt/mcpcheck/blob/main/LICENSE)
 [![MCP spec 2026-07-28](https://img.shields.io/badge/MCP%20spec-2026--07--28-blue)](https://modelcontextprotocol.io/specification/2026-07-28)
 
 Check that an MCP server conforms to the **2026-07-28** revision of the [Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28) over Streamable HTTP. Read-only. Zero config. One command.
@@ -48,11 +48,11 @@ That is a real run against the deliberately misbehaving server that ships in thi
 No server of your own yet? The repository ships a demo you can run in one command:
 
 ```shell
-git clone https://github.com/suresh-jbt/mcp-check && cd mcp-check
+git clone https://github.com/suresh-jbt/mcpcheck && cd mcpcheck
 make demo                       # same as: bash examples/demo.sh
 ```
 
-It takes about three seconds and needs nothing but [uv](https://docs.astral.sh/uv/). First it starts [`examples/demo_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/demo_server.py) — a small, heavily commented, fully conformant 2026-07-28 server built on the official SDK — on a free loopback port, and checks it:
+It takes about three seconds and needs nothing but [uv](https://docs.astral.sh/uv/). First it starts [`examples/demo_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/demo_server.py) — a small, heavily commented, fully conformant 2026-07-28 server built on the official SDK — on a free loopback port, and checks it:
 
 ```console
 == 1/2  A conformant MCP 2026-07-28 server (examples/demo_server.py)
@@ -87,7 +87,7 @@ cache	fail	cache.ttl_missing
 origin	fail	origin.evil_accepted
 ```
 
-`examples/demo_server.py` exists to be read: every block that is there *because the specification requires it* carries a one-line comment naming the requirement, and `--break FEATURE` introduces one realistic non-conformance at a time (`uv run python examples/demo_server.py --list-breaks`). [`examples/README.md`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/README.md) tabulates exactly which check, status and finding code each flaw produces.
+`examples/demo_server.py` exists to be read: every block that is there *because the specification requires it* carries a one-line comment naming the requirement, and `--break FEATURE` introduces one realistic non-conformance at a time (`uv run python examples/demo_server.py --list-breaks`). [`examples/README.md`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/README.md) tabulates exactly which check, status and finding code each flaw produces.
 
 To point `mcpcheck` at a server of your own, `uv run mcpcheck http://127.0.0.1:8000/mcp` inside that clone is the whole command; once 0.1.0 is on PyPI, `uvx mcpcheck <url>` will need no clone at all.
 
@@ -110,7 +110,7 @@ A server written for 2025-11-25 still answers `initialize` and looks healthy in 
 **0.1.0 is not on PyPI yet.** Until it is published, run `mcpcheck` from a clone — which is also what [Try it](#try-it) above does:
 
 ```shell
-git clone https://github.com/suresh-jbt/mcp-check && cd mcp-check
+git clone https://github.com/suresh-jbt/mcpcheck && cd mcpcheck
 uv sync
 uv run mcpcheck https://api.example.com/mcp
 ```
@@ -369,7 +369,7 @@ If no server is running locally, keep the check in CI instead, where the job can
 uvx mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
 ```
 
-New checks and new findings arrive in minor releases, so an unpinned `mcpcheck` can start failing a pull request that did not touch the server. Pin it, read the [changelog](https://github.com/suresh-jbt/mcp-check/blob/main/CHANGELOG.md) when you bump it, and keep the report as a build artifact: it records `mcpcheck_version`, `sdk_version` and `spec_revision`, so an old verdict stays explainable.
+New checks and new findings arrive in minor releases, so an unpinned `mcpcheck` can start failing a pull request that did not touch the server. Pin it, read the [changelog](https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md) when you bump it, and keep the report as a build artifact: it records `mcpcheck_version`, `sdk_version` and `spec_revision`, so an old verdict stays explainable.
 
 ### Debug a verdict you do not believe
 
@@ -384,7 +384,7 @@ mcpcheck http://127.0.0.1:8000/mcp --check origin -vv 2>&1 >/dev/null | head -20
 > 1 POST http://127.0.0.1:8000/mcp  tools/list
 >   accept: application/json, text/event-stream
 >   content-type: application/json
->   user-agent: mcpcheck/0.1.0 (+https://github.com/suresh-jbt/mcp-check)
+>   user-agent: mcpcheck/0.1.0 (+https://github.com/suresh-jbt/mcpcheck)
 >   mcp-protocol-version: 2026-07-28
 >   mcp-method: tools/list
 >   {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/clientInfo":{"name":"mcpcheck","version":"0.1.0"}}}}
@@ -397,7 +397,7 @@ mcpcheck http://127.0.0.1:8000/mcp --check origin -vv 2>&1 >/dev/null | head -20
 < 2 200 application/json 1ms
 ```
 
-A `200` on that second exchange is the whole `origin` failure: the server answered a request that claimed to come from `https://evil.example.com`. Secrets are redacted in this output too. If the exchange looks right and the verdict still looks wrong, that is a bug worth [reporting](https://github.com/suresh-jbt/mcp-check/blob/main/CONTRIBUTING.md) — attach the `--json` report.
+A `200` on that second exchange is the whole `origin` failure: the server answered a request that claimed to come from `https://evil.example.com`. Secrets are redacted in this output too. If the exchange looks right and the verdict still looks wrong, that is a bug worth [reporting](https://github.com/suresh-jbt/mcpcheck/blob/main/CONTRIBUTING.md) — attach the `--json` report.
 
 ## What it checks
 
@@ -418,7 +418,7 @@ Each check is independent, cites the clause it enforces, and classifies every fi
 
 ## Fixing what it finds
 
-The findings below are the ones real servers hit first. Every fix is code from [`examples/demo_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/demo_server.py), so it is code that passes the check it claims to fix: the test suite runs all eight checks against that server, and CI runs the demo itself.
+The findings below are the ones real servers hit first. Every fix is code from [`examples/demo_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/demo_server.py), so it is code that passes the check it claims to fix: the test suite runs all eight checks against that server, and CI runs the demo itself.
 
 ### `cache.ttl_missing`, `cache.scope_missing` (must)
 
@@ -590,7 +590,7 @@ With `--json`, or `--output FILE` (which keeps the human report on stdout), you 
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json",
   "schema_version": 1,
   "mcpcheck_version": "0.1.0",
   "sdk_version": "2.3.0",
@@ -684,7 +684,7 @@ With `--json`, or `--output FILE` (which keeps the human report on stdout), you 
 }
 ```
 
-Finding `code`s (`cache.ttl_missing`, `schemas.input_schema_invalid`, `origin.evil_accepted`, ...) are stable identifiers you can grep or suppress on; adding a code is a non-breaking change, renaming or removing one is not. The report format is versioned by `schema_version`; the JSON Schema ships in the repository as [`schema/mcpcheck-report.v1.schema.json`](https://github.com/suresh-jbt/mcp-check/blob/main/schema/mcpcheck-report.v1.schema.json) and is printed by `mcpcheck --json-schema`. Your token is never written to the report; only `"auth": "bearer"` and the *names* of any `--header` values are. [Slice the JSON report with jq](#slice-the-json-report-with-jq) has the one-liners worth keeping.
+Finding `code`s (`cache.ttl_missing`, `schemas.input_schema_invalid`, `origin.evil_accepted`, ...) are stable identifiers you can grep or suppress on; adding a code is a non-breaking change, renaming or removing one is not. The report format is versioned by `schema_version`; the JSON Schema ships in the repository as [`schema/mcpcheck-report.v1.schema.json`](https://github.com/suresh-jbt/mcpcheck/blob/main/schema/mcpcheck-report.v1.schema.json) and is printed by `mcpcheck --json-schema`. Your token is never written to the report; only `"auth": "bearer"` and the *names* of any `--header` values are. [Slice the JSON report with jq](#slice-the-json-report-with-jq) has the one-liners worth keeping.
 
 ## Exit codes
 
@@ -823,7 +823,7 @@ $ make help
   make readme-options    regenerate the README options table from mcpcheck --help
 ```
 
-**The demo server** ([`examples/demo_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/demo_server.py)) is the one to start with: conformant, commented, and breakable one requirement at a time. `make demo` runs the scripted version; by hand it is two commands in two shells:
+**The demo server** ([`examples/demo_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/demo_server.py)) is the one to start with: conformant, commented, and breakable one requirement at a time. `make demo` runs the scripted version; by hand it is two commands in two shells:
 
 ```console
 $ uv run python examples/demo_server.py --port 0
@@ -840,16 +840,16 @@ initialize     demand the legacy initialize handshake (2025-era server)
 all            every break above at once
 ```
 
-[`examples/README.md`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/README.md) has the verified table of what each `--break` does to which check.
+[`examples/README.md`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/README.md) has the verified table of what each `--break` does to which check.
 
-**The test fixtures** go further than the demo and are part of the test suite rather than of the installed package. [`tests/fixtures/reference_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/tests/fixtures/reference_server.py) is a fully conformant SDK server that every check must pass against — `make serve-reference`, or directly for its switches:
+**The test fixtures** go further than the demo and are part of the test suite rather than of the installed package. [`tests/fixtures/reference_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/tests/fixtures/reference_server.py) is a fully conformant SDK server that every check must pass against — `make serve-reference`, or directly for its switches:
 
 ```console
 $ uv run python -m tests.fixtures.reference_server --port 0
 mcpcheck reference server 0.1.0 listening on http://127.0.0.1:64782/mcp
 ```
 
-Flags: `--port N` (`0` = a free port, printed on stderr), `--json-response`, `--stateful` (dual-era: also answers `initialize`), `--no-origin-check`, `--require-token TOKEN`, `--no-output-schema`, `--empty`, `--bare`. [`tests/fixtures/misbehaving_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/tests/fixtures/misbehaving_server.py) is its opposite: a hand-rolled server with around a hundred independent toggles, one per finding `mcpcheck` can report. Pick the findings you want to see — this one reports `! discover` (one `should` warning) and `✗ cache` (eight MUST violations) and passes the other six checks:
+Flags: `--port N` (`0` = a free port, printed on stderr), `--json-response`, `--stateful` (dual-era: also answers `initialize`), `--no-origin-check`, `--require-token TOKEN`, `--no-output-schema`, `--empty`, `--bare`. [`tests/fixtures/misbehaving_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/tests/fixtures/misbehaving_server.py) is its opposite: a hand-rolled server with around a hundred independent toggles, one per finding `mcpcheck` can report. Pick the findings you want to see — this one reports `! discover` (one `should` warning) and `✗ cache` (eight MUST violations) and passes the other six checks:
 
 ```shell
 uv run python -m tests.fixtures.misbehaving_server --port 0 --toggle omit_ttl --toggle omit_cache_scope --toggle discover_no_server_info
@@ -857,12 +857,12 @@ uv run python -m tests.fixtures.misbehaving_server --port 0 --toggle omit_ttl --
 
 The [hero block](#mcpcheck) at the top of this file is a third configuration of the same server (those three toggles plus a `--set tools=…` listing with one invalid `inputSchema`); `tests/test_readme_hero.py` rebuilds that configuration, re-runs all eight checks against it and asserts the report still matches the README character for character, so the hero cannot go stale.
 
-See [CONTRIBUTING.md](https://github.com/suresh-jbt/mcp-check/blob/main/CONTRIBUTING.md) for the full list of toggles and for how to add a check.
+See [CONTRIBUTING.md](https://github.com/suresh-jbt/mcpcheck/blob/main/CONTRIBUTING.md) for the full list of toggles and for how to add a check.
 
 ## Contributing
 
-Bug reports, wrong-verdict reports (attach the `--json` report; it never contains your token) and new-check proposals (they must cite a spec clause) are welcome. Start with [CONTRIBUTING.md](https://github.com/suresh-jbt/mcp-check/blob/main/CONTRIBUTING.md); security issues go through [SECURITY.md](https://github.com/suresh-jbt/mcp-check/blob/main/SECURITY.md). This project follows the [Contributor Covenant](https://github.com/suresh-jbt/mcp-check/blob/main/CODE_OF_CONDUCT.md).
+Bug reports, wrong-verdict reports (attach the `--json` report; it never contains your token) and new-check proposals (they must cite a spec clause) are welcome. Start with [CONTRIBUTING.md](https://github.com/suresh-jbt/mcpcheck/blob/main/CONTRIBUTING.md); security issues go through [SECURITY.md](https://github.com/suresh-jbt/mcpcheck/blob/main/SECURITY.md). This project follows the [Contributor Covenant](https://github.com/suresh-jbt/mcpcheck/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
-MIT, see [LICENSE](https://github.com/suresh-jbt/mcp-check/blob/main/LICENSE).
+MIT, see [LICENSE](https://github.com/suresh-jbt/mcpcheck/blob/main/LICENSE).

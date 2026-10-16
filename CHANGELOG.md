@@ -161,4 +161,4 @@ is listed under *Changed* or *Removed*.
   line/paragraph separators and the BOM in server-controlled text (Trojan-Source
   style reordering), in addition to C0/C1 controls.
 
-[Unreleased]: https://github.com/suresh-jbt/mcp-check/commits/main
+[Unreleased]: https://github.com/suresh-jbt/mcpcheck/commits/main

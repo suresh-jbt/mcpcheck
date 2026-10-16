@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "$id": "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json",
   "title": "mcpcheck report",
   "description": "Machine-readable result of one mcpcheck run (schema_version 1). Additive changes keep schema_version; removals or type changes bump it.",
   "$defs": {

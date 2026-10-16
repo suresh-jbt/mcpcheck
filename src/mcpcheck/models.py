@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, computed_field
 
 SCHEMA_VERSION: Final = 1
 SPEC_REVISION: Final = "2026-07-28"
-SCHEMA_ID = "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json"
+SCHEMA_ID = "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json"
 CODE_PATTERN = r"^[a-z]+\.[a-z0-9_]+$"
 TIMESTAMP_PATTERN = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
 DATE_PATTERN = r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$"

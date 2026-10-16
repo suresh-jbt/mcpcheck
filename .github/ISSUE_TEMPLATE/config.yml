@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability (private)
-    url: https://github.com/suresh-jbt/mcp-check/security/advisories/new
+    url: https://github.com/suresh-jbt/mcpcheck/security/advisories/new
     about: Token leakage, a probe with side effects, or anything else from SECURITY.md. Please do not open a public issue.
   - name: MCP specification 2026-07-28
     url: https://modelcontextprotocol.io/specification/2026-07-28

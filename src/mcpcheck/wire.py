@@ -55,7 +55,7 @@ MAX_ITEMS_SHOWN = 5
 TRANSCRIPT_BODY_LIMIT = 64 * 1024
 UNKNOWN_TOOL_NAME = "mcpcheck__nonexistent_tool_7f3a"
 EVIL_ORIGIN = "https://evil.example.com"
-USER_AGENT = f"mcpcheck/{__version__} (+https://github.com/suresh-jbt/mcp-check)"
+USER_AGENT = f"mcpcheck/{__version__} (+https://github.com/suresh-jbt/mcpcheck)"
 
 # header names (lowercase; httpx2 headers are case-insensitive)
 H_ACCEPT = "accept"

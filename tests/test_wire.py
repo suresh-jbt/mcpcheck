@@ -495,7 +495,7 @@ def test_constants() -> None:
     assert wire.MAX_ITEMS_SHOWN == 5
     assert wire.UNKNOWN_TOOL_NAME == "mcpcheck__nonexistent_tool_7f3a"
     assert wire.EVIL_ORIGIN == "https://evil.example.com"
-    assert f"mcpcheck/{__version__} (+https://github.com/suresh-jbt/mcp-check)" == wire.USER_AGENT
+    assert f"mcpcheck/{__version__} (+https://github.com/suresh-jbt/mcpcheck)" == wire.USER_AGENT
 
 
 # --------------------------------------------------------------------------- hostile bodies / redaction

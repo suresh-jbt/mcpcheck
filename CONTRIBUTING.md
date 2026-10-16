@@ -29,8 +29,8 @@ that keep those three properties are very welcome.
 ## Development setup
 
 ```shell
-git clone https://github.com/suresh-jbt/mcp-check.git
-cd mcp-check
+git clone https://github.com/suresh-jbt/mcpcheck.git
+cd mcpcheck
 uv sync                 # creates .venv from uv.lock with the dev dependency group
 uv run mcpcheck --help  # the CLI from your checkout
 uvx pre-commit install  # optional: ruff, formatting, lockfile and workflow checks on commit
@@ -171,12 +171,12 @@ send `DELETE` or notifications, follow a cross-origin redirect, fetch a network
 or fail a server for behaviour the specification permits (label such findings
 `best-practice` and keep them warnings). A probe that could have side effects
 is a bug of the highest severity; see
-[SECURITY.md](https://github.com/suresh-jbt/mcp-check/blob/main/SECURITY.md).
+[SECURITY.md](https://github.com/suresh-jbt/mcpcheck/blob/main/SECURITY.md).
 
 ## Documentation
 
 The README is also the PyPI long description. Keep links absolute
-(`https://github.com/suresh-jbt/mcp-check/blob/main/...`), avoid HTML beyond
+(`https://github.com/suresh-jbt/mcpcheck/blob/main/...`), avoid HTML beyond
 what PyPI allows, and keep the real-run blocks real: regenerate them from the
 fixture servers (`NO_COLOR=1 COLUMNS=100 uv run mcpcheck <url>`) when output
 changes. `tests/test_readme.py` keeps the options table and the checks table in
@@ -217,10 +217,10 @@ uv build && uvx twine@7.0.0 check --strict dist/*
 
 ## Code of conduct
 
-This project follows the [Contributor Covenant 2.1](https://github.com/suresh-jbt/mcp-check/blob/main/CODE_OF_CONDUCT.md).
+This project follows the [Contributor Covenant 2.1](https://github.com/suresh-jbt/mcpcheck/blob/main/CODE_OF_CONDUCT.md).
 By participating you agree to abide by it.
 
 ## License
 
 By contributing you agree that your contributions are licensed under the
-[MIT License](https://github.com/suresh-jbt/mcp-check/blob/main/LICENSE).
+[MIT License](https://github.com/suresh-jbt/mcpcheck/blob/main/LICENSE).

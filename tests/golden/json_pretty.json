@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json",
   "schema_version": 1,
   "mcpcheck_version": "0.1.0",
   "sdk_version": "2.3.0",

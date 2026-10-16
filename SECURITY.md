@@ -13,7 +13,7 @@ Only the newest release of `mcpcheck` receives fixes. Reproduce against it
 ## Reporting a vulnerability
 
 Please report security issues privately through GitHub's
-[private vulnerability reporting](https://github.com/suresh-jbt/mcp-check/security/advisories/new)
+[private vulnerability reporting](https://github.com/suresh-jbt/mcpcheck/security/advisories/new)
 for this repository (Security tab, "Report a vulnerability"). If that is not
 possible, email suresh@jarvisbitz.com with "mcpcheck security" in the subject.
 

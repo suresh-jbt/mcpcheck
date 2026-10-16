@@ -41,11 +41,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/suresh-jbt/mcp-check"
-Documentation = "https://github.com/suresh-jbt/mcp-check#readme"
-Repository = "https://github.com/suresh-jbt/mcp-check"
-Issues = "https://github.com/suresh-jbt/mcp-check/issues"
-Changelog = "https://github.com/suresh-jbt/mcp-check/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/suresh-jbt/mcpcheck"
+Documentation = "https://github.com/suresh-jbt/mcpcheck#readme"
+Repository = "https://github.com/suresh-jbt/mcpcheck"
+Issues = "https://github.com/suresh-jbt/mcpcheck/issues"
+Changelog = "https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md"
 
 [project.scripts]
 mcpcheck = "mcpcheck.__main__:main"

@@ -7,7 +7,7 @@
 # (expects exit 0), restarts it with three deliberate flaws and runs mcpcheck again
 # (expects exit 1). The server is always killed on the way out, including on Ctrl-C.
 #
-# Needs nothing but `uv` inside a clone of https://github.com/suresh-jbt/mcp-check.
+# Needs nothing but `uv` inside a clone of https://github.com/suresh-jbt/mcpcheck.
 # Override the command under test with MCPCHECK, e.g.
 #   MCPCHECK=mcpcheck bash examples/demo.sh                  # an mcpcheck on PATH
 #   MCPCHECK="uvx mcpcheck@0.1.0" bash examples/demo.sh      # once 0.1.0 is on PyPI

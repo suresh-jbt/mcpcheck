@@ -1,17 +1,17 @@
 # The mcpcheck demo
 
-Two files and one command. [`demo_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/demo_server.py)
+Two files and one command. [`demo_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/demo_server.py)
 is a small, heavily commented MCP server built on the official
 [`mcp`](https://pypi.org/project/mcp/) Python SDK that is **fully conformant to
 [MCP 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28)** — and that can
-be told to misbehave on purpose. [`demo.sh`](https://github.com/suresh-jbt/mcp-check/blob/main/examples/demo.sh)
+be told to misbehave on purpose. [`demo.sh`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/demo.sh)
 runs `mcpcheck` against both versions of it.
 
 ## Run it
 
 ```shell
-git clone https://github.com/suresh-jbt/mcp-check
-cd mcp-check
+git clone https://github.com/suresh-jbt/mcpcheck
+cd mcpcheck
 bash examples/demo.sh      # or: make demo
 ```
 
@@ -75,7 +75,7 @@ Two things to notice:
 
 - **Warnings do not fail the run.** `--break discover` exits 0 and prints
   `All 8 checks passed, 1 warning`. Add
-  [`--strict`](https://github.com/suresh-jbt/mcp-check#options) to make warnings and
+  [`--strict`](https://github.com/suresh-jbt/mcpcheck#options) to make warnings and
   inconclusive checks fail too.
 - **`handshake` is the era gate.** A server that demands `initialize` cannot be judged
   any further, so `--break initialize` (and `--break all`) reports the remaining seven
@@ -85,7 +85,7 @@ Two things to notice:
 
 `mcpcheck` needs nothing but the URL of your Streamable HTTP endpoint, and sends only
 read-only requests (see
-[Safety: what mcpcheck sends](https://github.com/suresh-jbt/mcp-check#safety-what-mcpcheck-sends)):
+[Safety: what mcpcheck sends](https://github.com/suresh-jbt/mcpcheck#safety-what-mcpcheck-sends)):
 
 ```shell
 uv run mcpcheck http://127.0.0.1:8000/mcp                     # local dev server
@@ -104,14 +104,14 @@ your own: for every check you fail, the demo server shows the few lines that sat
 
 The test suite ships two more servers, both more extreme than this demo:
 
-- [`tests/fixtures/reference_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/tests/fixtures/reference_server.py)
+- [`tests/fixtures/reference_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/tests/fixtures/reference_server.py)
   — the conformant SDK server every check must pass against, with switches for
   authentication, JSON-only responses, empty capabilities and the dual-era handshake.
   Serve it with `make serve-reference`.
-- [`tests/fixtures/misbehaving_server.py`](https://github.com/suresh-jbt/mcp-check/blob/main/tests/fixtures/misbehaving_server.py)
+- [`tests/fixtures/misbehaving_server.py`](https://github.com/suresh-jbt/mcpcheck/blob/main/tests/fixtures/misbehaving_server.py)
   — a hand-rolled server with around a hundred independent toggles, one per finding
   `mcpcheck` can report. It is how the checks themselves are tested.
 
 Neither is shipped in the wheel; clone the repository to use them. See
-[CONTRIBUTING.md](https://github.com/suresh-jbt/mcp-check/blob/main/CONTRIBUTING.md) for
+[CONTRIBUTING.md](https://github.com/suresh-jbt/mcpcheck/blob/main/CONTRIBUTING.md) for
 the development workflow.

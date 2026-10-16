@@ -222,7 +222,7 @@ async def test_pass_scripted_and_exact_request(sse: bool) -> None:
     assert h["content-type"] == "application/json"
     assert h["mcp-protocol-version"] == "2026-07-28"
     assert h["mcp-method"] == "tools/list"
-    assert h["user-agent"] == f"mcpcheck/{__version__} (+https://github.com/suresh-jbt/mcp-check)"
+    assert h["user-agent"] == f"mcpcheck/{__version__} (+https://github.com/suresh-jbt/mcpcheck)"
     assert "origin" not in h
     assert "authorization" not in h
     assert "mcp-session-id" not in h
