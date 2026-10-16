@@ -1,0 +1,56 @@
+name: New check or finding proposal
+description: Propose a new check, or a new finding inside an existing check. It must cite a clause and be observable by a read-only client.
+title: "[check] "
+labels: ["enhancement", "new-check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        mcpcheck only enforces what the MCP 2026-07-28 specification says and only sends requests from the read-only allow-list described in the README under *Safety: what mcpcheck sends*. Proposals that need tool execution with valid input, `resources/read`, `prompts/get`, `DELETE` or notifications will not be accepted; see CONTRIBUTING.md, *Adding a check*.
+  - type: input
+    id: name
+    attributes:
+      label: Proposed check name or finding code
+      description: Lower-case; a finding code is `<check>.<snake_slug>`.
+      placeholder: cache.ttl_zero_everywhere
+    validations:
+      required: true
+  - type: input
+    id: clause
+    attributes:
+      label: Specification clause
+      description: Link to the exact section of https://modelcontextprotocol.io/specification/2026-07-28 and quote the normative sentence.
+    validations:
+      required: true
+  - type: dropdown
+    id: level
+    attributes:
+      label: Normative level
+      description: MUST / MUST NOT becomes a `must` finding (fails the run); SHOULD becomes `should` (warning); anything the spec leaves open can only be `best-practice` (warning).
+      options:
+        - must (spec says MUST / MUST NOT)
+        - should (spec says SHOULD / SHOULD NOT)
+        - best-practice (spec is permissive; mcpcheck's opinion)
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: How a read-only client observes it
+      description: Which request(s) from the allow-list reveal the behaviour, and what exactly in the response distinguishes pass from fail.
+    validations:
+      required: true
+  - type: textarea
+    id: fixtures
+    attributes:
+      label: How the fixtures would reproduce it
+      description: What the reference server already does for the PASS path, and which toggle the misbehaving server would need for the FAIL/WARN path.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: The proposal does not require calling a tool with valid arguments, reading a resource, rendering a prompt, sending DELETE or notifications, or following a cross-origin redirect.
+          required: true
+        - label: I searched existing issues and the finding-code registry (`src/mcpcheck/checks/codes.py`) for duplicates.
+          required: true

@@ -1,0 +1,68 @@
+# Install once:  uvx pre-commit install        (pre-commit 4.7 itself needs Python >= 3.11; uvx handles that)
+# Run on all:    uvx pre-commit run --all-files
+# Update revs:   uvx pre-commit autoupdate     (Dependabot `pre-commit` ecosystem also opens PRs)
+minimum_pre_commit_version: "4.0.0"
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1                      # keep == ruff version in uv.lock / [dependency-groups].lint
+    hooks:
+      - id: ruff-check                # (`ruff` id is a deprecated alias)
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.13.1                       # tags here are plain `X.Y.Z` (no leading v)
+    hooks:
+      - id: uv-lock                   # keeps uv.lock in sync when pyproject.toml changes
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.38.2
+    hooks:
+      - id: check-github-workflows
+        args: ["--verbose"]
+      - id: check-dependabot
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.31.1
+    hooks:
+      - id: zizmor                    # GitHub Actions security audit (same tool as the CI lint job)
+
+  # mypy runs from the project's own locked environment (exact versions, all deps importable),
+  # which is why we do NOT use pre-commit/mirrors-mypy (it would need every dep re-listed).
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (uv run, locked env)
+        entry: uv run --frozen --no-sync mypy
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
+        stages: [pre-push]
+      - id: pytest-fast
+        name: pytest (unit, pre-push)
+        entry: uv run --frozen --no-sync pytest -q -x -m "not integration"
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+ci:
+  # pre-commit.ci (if enabled): skip hooks that need the local uv environment / network.
+  skip: [mypy, pytest-fast, uv-lock, zizmor]
+  autoupdate_schedule: monthly

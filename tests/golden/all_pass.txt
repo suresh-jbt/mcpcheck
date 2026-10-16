@@ -1,0 +1,13 @@
+mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
+server: example-server 2.4.0 · speaks 2026-07-28 · 8 checks
+
+✓ handshake     Server does not require `initialize`
+✓ session       No `Mcp-Session-Id` issued or expected; lists identical across 3 connections
+✓ discover      `server/discover` responds correctly
+✓ protocol      Header validation and version errors conform
+✓ schemas       All 12 tools publish valid schemas
+✓ errors        Tool errors carry actionable messages
+✓ cache         Cache hints valid on 4 list methods (6 pages)
+✓ origin        Origin header validated
+
+All 8 checks passed in 1.3s.

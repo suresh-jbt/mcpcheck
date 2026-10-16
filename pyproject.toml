@@ -1,0 +1,149 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcpcheck"
+version = "0.1.0"
+description = "Validate an MCP server's conformance to the MCP 2026-07-28 revision over Streamable HTTP (read-only)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "suresh-jbt", email = "suresh@jarvisbitz.com" }]
+keywords = ["mcp", "model-context-protocol", "conformance", "validator", "streamable-http", "json-rpc", "cli"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Framework :: AsyncIO",
+  "Framework :: Pydantic :: 2",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+  "Typing :: Typed",
+]
+dependencies = [
+  "mcp>=2.2,<3",
+  "httpx2>=2.10",
+  "anyio>=4.9",
+  "pydantic>=2.12",
+  "click>=8.2",
+  "rich>=13.9.4",
+  "jsonschema>=4.20",
+]
+
+[project.urls]
+Homepage = "https://github.com/suresh-jbt/mcp-check"
+Documentation = "https://github.com/suresh-jbt/mcp-check#readme"
+Repository = "https://github.com/suresh-jbt/mcp-check"
+Issues = "https://github.com/suresh-jbt/mcp-check/issues"
+Changelog = "https://github.com/suresh-jbt/mcp-check/blob/main/CHANGELOG.md"
+
+[project.scripts]
+mcpcheck = "mcpcheck.__main__:main"
+
+[dependency-groups]
+dev = [{ include-group = "test" }, { include-group = "lint" }, { include-group = "typecheck" }]
+test = [
+  "pytest>=9",
+  "pytest-cov>=6.0",
+  "pytest-timeout>=2.3",
+  "pytest-xdist>=3.6",
+  "starlette>=0.27",
+  "uvicorn>=0.31.1",
+]
+lint = ["ruff>=0.17", "readme-renderer[md]>=46"]
+typecheck = ["mypy>=2.0", "types-jsonschema>=4.20"]
+
+[tool.uv]
+required-version = ">=0.12"
+default-groups = ["dev"]
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github", "/.pre-commit-config.yaml", "/uv.lock", "/.python-version", "/dist", "/reports", "/htmlcov", "/.coverage*", "/.venv", "/PLAN.md"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = ["*.md"]   # ruff formats Markdown code fences; keep PLAN.md/README.md untouched
+
+[tool.ruff.lint]
+select = ["E","W","F","I","UP","B","ASYNC","C4","SIM","RUF","PT","PERF","S","N","ISC","PIE","T20","RET","ARG","TC","FA","PTH","PGH","LOG","G","TRY","EM","BLE","A","FURB","FLY","D"]
+ignore = ["E501","ISC001","D105","D107","TRY003","EM101","EM102"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101","S105","S106","D","ARG001","ARG002"]
+"scripts/**" = ["T201","D"]
+"src/mcpcheck/output.py" = ["T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["mcpcheck"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "tests"]
+warn_unreachable = true
+pretty = true
+show_error_codes = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool", "possibly-undefined"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_decorators = false
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-config --strict-markers -p anyio --import-mode=importlib"
+xfail_strict = true
+filterwarnings = ["error"]
+timeout = 60
+markers = [
+  "integration: exercises the in-repo fixture HTTP server (free port, 127.0.0.1)",
+  "slow: > 1 s by design",
+  "sdk_matrix: asserts SDK facts",
+  "legacy: needs an mcp<2 environment",
+  "network: hits the public spec site",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["mcpcheck"]
+parallel = true
+relative_files = true
+
+[tool.coverage.paths]
+source = ["src/mcpcheck", "*/site-packages/mcpcheck"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 85
+exclude_also = ["if TYPE_CHECKING:", "@overload", "raise NotImplementedError", "if __name__ == .__main__.:", "except PackageNotFoundError:"]

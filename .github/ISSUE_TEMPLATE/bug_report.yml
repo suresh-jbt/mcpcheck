@@ -1,0 +1,68 @@
+name: Bug report
+description: mcpcheck crashed, hung, exited 2 unexpectedly, or produced output that is wrong in a way that is not a verdict about your server.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For a verdict you think is wrong (a check that failed or passed when it should not have), use the **Wrong verdict** form instead. For anything security related (token leakage, a probe with side effects), use private vulnerability reporting, see SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you run and what did mcpcheck do? Paste the command with the token removed.
+      placeholder: |
+        $ mcpcheck https://... --token ****
+        Traceback (most recent call last): ...
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: mcpcheck version
+      description: Output of `mcpcheck --version`.
+      placeholder: mcpcheck 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Python, mcp SDK and OS
+      description: For example `python 3.13.5, mcp 2.3.0, macOS 15` (`--json` prints `python_version` and `sdk_version`).
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install mcpcheck?
+      options:
+        - uvx / uv tool
+        - pipx
+        - pip
+        - from a git checkout
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: verbose
+    attributes:
+      label: Verbose transcript
+      description: Output of the same command with `-vv`, if it helps. Secrets are redacted automatically; please double-check anyway.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I removed the token and any other secret from everything pasted above.
+          required: true
+        - label: I reproduced this with the newest release (`uvx mcpcheck@latest`).
+          required: false

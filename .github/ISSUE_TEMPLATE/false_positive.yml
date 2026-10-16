@@ -1,0 +1,67 @@
+name: Wrong verdict (false positive or negative)
+description: A check failed although the server conforms, or passed although it does not. The --json report and the spec clause are required.
+title: "[verdict] "
+labels: ["wrong-verdict"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every finding mcpcheck emits cites a clause of the MCP 2026-07-28 specification. To decide whether a verdict is wrong we need the clause you read and the raw evidence, so the two fields below are mandatory. The JSON report never contains your token; header *values* from `--header` are not stored either.
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Kind
+      options:
+        - False positive (mcpcheck failed or warned; the server conforms)
+        - False negative (mcpcheck passed; the server does not conform)
+    validations:
+      required: true
+  - type: input
+    id: code
+    attributes:
+      label: Finding code or check name
+      description: The `code` of the finding (for example `cache.ttl_missing`) or, for a false negative, the check that should have caught it.
+      placeholder: cache.ttl_missing
+    validations:
+      required: true
+  - type: input
+    id: clause
+    attributes:
+      label: Specification clause
+      description: Link to the exact section of https://modelcontextprotocol.io/specification/2026-07-28 and quote the sentence (MUST / SHOULD / MAY) you rely on.
+      placeholder: https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching#cacheable-results
+    validations:
+      required: true
+  - type: textarea
+    id: argument
+    attributes:
+      label: Why the verdict is wrong
+      description: Your reading of the clause and how the server's behaviour satisfies (or violates) it.
+    validations:
+      required: true
+  - type: textarea
+    id: json
+    attributes:
+      label: JSON report
+      description: Output of `mcpcheck <url> --json` (or the `--output` file). You may trim it to the relevant check with `jq '.checks |= map(select(.name == "cache"))'`.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: wire
+    attributes:
+      label: Raw exchange (optional)
+      description: The relevant request and response from `mcpcheck <url> -vv`, or a curl transcript. Remove secrets.
+      render: text
+  - type: input
+    id: server
+    attributes:
+      label: Server implementation
+      description: Framework / SDK and version, or "hand-rolled". A public repository or a minimal reproduction helps a lot.
+  - type: input
+    id: version
+    attributes:
+      label: mcpcheck version
+      placeholder: mcpcheck 0.1.0
+    validations:
+      required: true

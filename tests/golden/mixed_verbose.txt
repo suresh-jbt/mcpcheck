@@ -1,0 +1,26 @@
+mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
+server: (no serverInfo) · speaks 2026-07-28 · 8 checks
+
+✓ handshake     Server does not require `initialize`
+✓ session       No `Mcp-Session-Id` issued or expected; lists identical across 3 connections
+! discover      `server/discover` responds correctly (1 warning)
+    ! result._meta["io.modelcontextprotocol/serverInfo"]: server does not identify itself  [should]
+    spec: https://modelcontextprotocol.io/specification/2026-07-28/server/discover
+✓ protocol      Header validation and version errors conform
+✗ schemas       2 of 12 tools have invalid inputSchema (+3 more issues)
+    ✗ tool:search_orders: inputSchema is not a valid JSON Schema 2020-12: 'nonsense' is not valid under any of the given schemas  [must]
+    ✗ tool:get_quote: inputSchema is not a valid JSON Schema 2020-12: 'nonsense' is not valid under any of the given schemas  [must]
+    ! tool:get_invoice: outputSchema absent; optional per spec  [best-practice]
+    ! tool:list_orders: outputSchema absent; optional per spec  [best-practice]
+    ! tool:ship_order: outputSchema absent; optional per spec  [best-practice]
+    ! tool:refund: outputSchema absent; optional per spec  [best-practice]
+    spec: https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool
+? errors        No probe-safe tools (12 listed; annotate readOnlyHint/destructiveHint or use --probe all)
+✗ cache         2 cache-hint violations: prompts/list ttlMs missing; prompts/list cacheScope missing
+    ✗ prompts/list: result has no ttlMs  [must]
+    ✗ prompts/list: result has no cacheScope  [must]
+    i resources/read: resources/read hints not verified (read-only policy)  [info]
+    spec: https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching#cacheable-results
+✓ origin        Origin header validated
+
+2 of 8 checks failed, 1 warning, 1 inconclusive. See --json for details.

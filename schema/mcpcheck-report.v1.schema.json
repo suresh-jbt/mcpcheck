@@ -1,0 +1,602 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "title": "mcpcheck report",
+  "description": "Machine-readable result of one mcpcheck run (schema_version 1). Additive changes keep schema_version; removals or type changes bump it.",
+  "$defs": {
+    "CheckError": {
+      "additionalProperties": false,
+      "description": "Why a check ended in status ``error``.",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "message"
+      ],
+      "title": "CheckError",
+      "type": "object"
+    },
+    "CheckName": {
+      "description": "The eight checks in canonical order (closed enum within schema_version 1).",
+      "enum": [
+        "handshake",
+        "session",
+        "discover",
+        "protocol",
+        "schemas",
+        "errors",
+        "cache",
+        "origin"
+      ],
+      "title": "CheckName",
+      "type": "string"
+    },
+    "CheckResult": {
+      "additionalProperties": false,
+      "description": "One row of the report.",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/CheckName"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "summary": {
+          "maxLength": 100,
+          "title": "Summary",
+          "type": "string"
+        },
+        "details": {
+          "default": "",
+          "title": "Details",
+          "type": "string"
+        },
+        "spec_url": {
+          "title": "Spec Url",
+          "type": "string"
+        },
+        "failures": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Failures",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "info": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Info",
+          "type": "array"
+        },
+        "duration_ms": {
+          "minimum": 0,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "requests": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Requests",
+          "type": "integer"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Level"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Highest level among failures and warnings; null when none.",
+          "readOnly": true
+        },
+        "passed": {
+          "description": "true iff this check did not raise the exit code.",
+          "readOnly": true,
+          "title": "Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "status",
+        "summary",
+        "spec_url",
+        "duration_ms",
+        "severity",
+        "passed"
+      ],
+      "title": "CheckResult",
+      "type": "object",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "fail"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "failures": {
+                "minItems": 1
+              },
+              "passed": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "pass"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "failures": {
+                "maxItems": 0
+              },
+              "warnings": {
+                "maxItems": 0
+              },
+              "passed": {
+                "const": true
+              },
+              "severity": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "error"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "error": {
+                "type": "object"
+              },
+              "passed": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Era": {
+      "description": "Which protocol eras the server was observed to serve.",
+      "enum": [
+        "modern-only",
+        "dual-era",
+        "legacy-only",
+        "unknown"
+      ],
+      "title": "Era",
+      "type": "string"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "description": "One observation: a spec clause, where it was violated and the evidence.",
+      "properties": {
+        "code": {
+          "description": "<check>.<snake_slug>, registered in checks/codes.py",
+          "pattern": "^[a-z]+\\.[a-z0-9_]+$",
+          "title": "Code",
+          "type": "string"
+        },
+        "level": {
+          "$ref": "#/$defs/Level"
+        },
+        "subject": {
+          "description": "Tool name, RPC method, header, 'tools/list page 2', probe id …",
+          "title": "Subject",
+          "type": "string"
+        },
+        "message": {
+          "description": "One sanitized sentence",
+          "maxLength": 500,
+          "title": "Message",
+          "type": "string"
+        },
+        "spec_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Absent only for best-practice findings",
+          "title": "Spec Url"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "got/expected/http_status/rpc_code/probe/request/path/page/hint",
+          "title": "Evidence"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Handoff compat: tool name when subject is a tool",
+          "title": "Tool"
+        },
+        "issue": {
+          "description": "Handoff compatibility: same text as message.",
+          "readOnly": true,
+          "title": "Issue",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "level",
+        "subject",
+        "message",
+        "issue"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Level": {
+      "description": "Normative weight of a finding, derived from the RFC keyword of the quoted clause.",
+      "enum": [
+        "must",
+        "should",
+        "best-practice"
+      ],
+      "title": "Level",
+      "type": "string"
+    },
+    "Options": {
+      "additionalProperties": false,
+      "description": "Behavioural flags of the run.",
+      "properties": {
+        "strict": {
+          "title": "Strict",
+          "type": "boolean"
+        },
+        "probe": {
+          "enum": [
+            "safe",
+            "all",
+            "none"
+          ],
+          "title": "Probe",
+          "type": "string"
+        },
+        "max_tools": {
+          "minimum": 1,
+          "title": "Max Tools",
+          "type": "integer"
+        },
+        "timeout": {
+          "exclusiveMinimum": 0,
+          "title": "Timeout",
+          "type": "number"
+        },
+        "legacy_probes": {
+          "title": "Legacy Probes",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "strict",
+        "probe",
+        "max_tools",
+        "timeout",
+        "legacy_probes"
+      ],
+      "title": "Options",
+      "type": "object"
+    },
+    "Request": {
+      "additionalProperties": false,
+      "description": "How mcpcheck talked to the server (never the secret values themselves).",
+      "properties": {
+        "origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Origin"
+        },
+        "auth": {
+          "enum": [
+            "none",
+            "bearer"
+          ],
+          "title": "Auth",
+          "type": "string"
+        },
+        "extra_headers": {
+          "description": "Header names only.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Extra Headers",
+          "type": "array"
+        },
+        "tls_verify": {
+          "title": "Tls Verify",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "origin",
+        "auth",
+        "tls_verify"
+      ],
+      "title": "Request",
+      "type": "object"
+    },
+    "Status": {
+      "description": "Outcome of one check (a ``(str, Enum)`` pair for Python 3.10 compatibility).",
+      "enum": [
+        "pass",
+        "warn",
+        "fail",
+        "inconclusive",
+        "error"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "description": "Counts over the selected checks and the process exit code.",
+      "properties": {
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "passed": {
+          "minimum": 0,
+          "title": "Passed",
+          "type": "integer"
+        },
+        "warned": {
+          "minimum": 0,
+          "title": "Warned",
+          "type": "integer"
+        },
+        "failed": {
+          "minimum": 0,
+          "title": "Failed",
+          "type": "integer"
+        },
+        "inconclusive": {
+          "minimum": 0,
+          "title": "Inconclusive",
+          "type": "integer"
+        },
+        "errored": {
+          "minimum": 0,
+          "title": "Errored",
+          "type": "integer"
+        },
+        "skipped": {
+          "items": {
+            "$ref": "#/$defs/CheckName"
+          },
+          "title": "Skipped",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "exit_code": {
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "title": "Exit Code",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "passed",
+        "warned",
+        "failed",
+        "inconclusive",
+        "errored",
+        "exit_code"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mcpcheck_version",
+    "sdk_version",
+    "python_version",
+    "spec_revision",
+    "server",
+    "request",
+    "options",
+    "protocol_version",
+    "server_supported_versions",
+    "server_info",
+    "era",
+    "timestamp",
+    "duration_ms",
+    "checks",
+    "summary"
+  ],
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "mcpcheck_version": {
+      "title": "Mcpcheck Version",
+      "type": "string"
+    },
+    "sdk_version": {
+      "description": "importlib.metadata.version('mcp')",
+      "title": "Sdk Version",
+      "type": "string"
+    },
+    "python_version": {
+      "title": "Python Version",
+      "type": "string"
+    },
+    "spec_revision": {
+      "const": "2026-07-28",
+      "default": "2026-07-28",
+      "title": "Spec Revision",
+      "type": "string"
+    },
+    "server": {
+      "description": "SERVER_URL as given (handoff shape); userinfo never present.",
+      "title": "Server",
+      "type": "string"
+    },
+    "request": {
+      "$ref": "#/$defs/Request"
+    },
+    "options": {
+      "$ref": "#/$defs/Options"
+    },
+    "protocol_version": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The version mcpcheck sent and the server served; null if no modern request succeeded.",
+      "title": "Protocol Version"
+    },
+    "server_supported_versions": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "From discover.supportedVersions or -32022 data.supported.",
+      "title": "Server Supported Versions"
+    },
+    "server_info": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Copy of _meta['io.modelcontextprotocol/serverInfo'] (self-reported, unverified).",
+      "title": "Server Info"
+    },
+    "era": {
+      "$ref": "#/$defs/Era"
+    },
+    "timestamp": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "duration_ms": {
+      "minimum": 0,
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "checks": {
+      "description": "One entry per selected check in canonical order; deselected checks are listed in summary.skipped.",
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    }
+  }
+}

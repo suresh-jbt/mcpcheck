@@ -1,0 +1,294 @@
+{
+  "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcp-check/main/schema/mcpcheck-report.v1.schema.json",
+  "schema_version": 1,
+  "mcpcheck_version": "0.1.0",
+  "sdk_version": "2.3.0",
+  "python_version": "3.13.5",
+  "spec_revision": "2026-07-28",
+  "server": "https://api.example.com/mcp",
+  "request": {
+    "origin": null,
+    "auth": "bearer",
+    "extra_headers": [],
+    "tls_verify": true
+  },
+  "options": {
+    "strict": false,
+    "probe": "safe",
+    "max_tools": 20,
+    "timeout": 10.0,
+    "legacy_probes": false
+  },
+  "protocol_version": "2026-07-28",
+  "server_supported_versions": [
+    "2026-07-28"
+  ],
+  "server_info": null,
+  "era": "unknown",
+  "timestamp": "2026-10-16T14:32:11Z",
+  "duration_ms": 1342,
+  "checks": [
+    {
+      "name": "handshake",
+      "title": "Server does not require initialize",
+      "status": "pass",
+      "summary": "Server does not require `initialize`",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic#statelessness",
+      "failures": [],
+      "warnings": [],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 1,
+      "error": null,
+      "severity": null,
+      "passed": true
+    },
+    {
+      "name": "session",
+      "title": "No Mcp-Session-Id; list results stable across connections",
+      "status": "pass",
+      "summary": "No `Mcp-Session-Id` issued or expected; lists identical across 3 connections",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http#earlier-streamable-http-revisions",
+      "failures": [],
+      "warnings": [],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 14,
+      "error": null,
+      "severity": null,
+      "passed": true
+    },
+    {
+      "name": "discover",
+      "title": "server/discover implemented and well-formed",
+      "status": "warn",
+      "summary": "`server/discover` responds correctly (1 warning)",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/discover",
+      "failures": [],
+      "warnings": [
+        {
+          "code": "discover.server_info_missing",
+          "level": "should",
+          "subject": "result._meta[\"io.modelcontextprotocol/serverInfo\"]",
+          "message": "server does not identify itself",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/discover#discoverresult",
+          "evidence": {
+            "got": null,
+            "expected": "{\"name\": string, \"version\": string}"
+          },
+          "tool": null,
+          "issue": "server does not identify itself"
+        }
+      ],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 1,
+      "error": null,
+      "severity": "should",
+      "passed": true
+    },
+    {
+      "name": "protocol",
+      "title": "Protocol headers and version errors validated",
+      "status": "pass",
+      "summary": "Header validation and version errors conform",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http#protocol-version-header",
+      "failures": [],
+      "warnings": [],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 8,
+      "error": null,
+      "severity": null,
+      "passed": true
+    },
+    {
+      "name": "schemas",
+      "title": "Tool inputSchema/outputSchema are valid JSON Schema",
+      "status": "fail",
+      "summary": "2 of 12 tools have invalid inputSchema (+3 more issues)",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#tool",
+      "failures": [
+        {
+          "code": "schemas.input_schema_invalid",
+          "level": "must",
+          "subject": "tool:search_orders",
+          "message": "inputSchema is not a valid JSON Schema 2020-12: 'nonsense' is not valid under any of the given schemas",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic#schema-validation",
+          "evidence": {
+            "path": "$.tools[4].inputSchema.type",
+            "page": 0
+          },
+          "tool": "search_orders",
+          "issue": "inputSchema is not a valid JSON Schema 2020-12: 'nonsense' is not valid under any of the given schemas"
+        },
+        {
+          "code": "schemas.input_schema_invalid",
+          "level": "must",
+          "subject": "tool:get_quote",
+          "message": "inputSchema is not a valid JSON Schema 2020-12: 'nonsense' is not valid under any of the given schemas",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic#schema-validation",
+          "evidence": {
+            "path": "$.tools[4].inputSchema.type",
+            "page": 0
+          },
+          "tool": "get_quote",
+          "issue": "inputSchema is not a valid JSON Schema 2020-12: 'nonsense' is not valid under any of the given schemas"
+        }
+      ],
+      "warnings": [
+        {
+          "code": "schemas.output_schema_missing",
+          "level": "best-practice",
+          "subject": "tool:get_invoice",
+          "message": "outputSchema absent; optional per spec",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#output-schema",
+          "evidence": null,
+          "tool": "get_invoice",
+          "issue": "outputSchema absent; optional per spec"
+        },
+        {
+          "code": "schemas.output_schema_missing",
+          "level": "best-practice",
+          "subject": "tool:list_orders",
+          "message": "outputSchema absent; optional per spec",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#output-schema",
+          "evidence": null,
+          "tool": "list_orders",
+          "issue": "outputSchema absent; optional per spec"
+        },
+        {
+          "code": "schemas.output_schema_missing",
+          "level": "best-practice",
+          "subject": "tool:ship_order",
+          "message": "outputSchema absent; optional per spec",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#output-schema",
+          "evidence": null,
+          "tool": "ship_order",
+          "issue": "outputSchema absent; optional per spec"
+        },
+        {
+          "code": "schemas.output_schema_missing",
+          "level": "best-practice",
+          "subject": "tool:refund",
+          "message": "outputSchema absent; optional per spec",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#output-schema",
+          "evidence": null,
+          "tool": "refund",
+          "issue": "outputSchema absent; optional per spec"
+        }
+      ],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 0,
+      "error": null,
+      "severity": "must",
+      "passed": false
+    },
+    {
+      "name": "errors",
+      "title": "Invalid tool calls are rejected with useful errors",
+      "status": "inconclusive",
+      "summary": "No probe-safe tools (12 listed; annotate readOnlyHint/destructiveHint or use --probe all)",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling",
+      "failures": [],
+      "warnings": [],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 1,
+      "error": null,
+      "severity": null,
+      "passed": true
+    },
+    {
+      "name": "cache",
+      "title": "ttlMs/cacheScope present and valid on list results",
+      "status": "fail",
+      "summary": "2 cache-hint violations: prompts/list ttlMs missing; prompts/list cacheScope missing",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching#cacheable-results",
+      "failures": [
+        {
+          "code": "cache.ttl_missing",
+          "level": "must",
+          "subject": "prompts/list",
+          "message": "result has no ttlMs",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching#cacheable-results",
+          "evidence": {
+            "method": "prompts/list",
+            "page": 0,
+            "got": null,
+            "expected": "JSON integer >= 0"
+          },
+          "tool": null,
+          "issue": "result has no ttlMs"
+        },
+        {
+          "code": "cache.scope_missing",
+          "level": "must",
+          "subject": "prompts/list",
+          "message": "result has no cacheScope",
+          "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching#cache-scope-field",
+          "evidence": {
+            "method": "prompts/list",
+            "page": 0,
+            "got": null,
+            "expected": "\"public\" | \"private\""
+          },
+          "tool": null,
+          "issue": "result has no cacheScope"
+        }
+      ],
+      "warnings": [],
+      "info": [
+        {
+          "code": "cache.resources_read_not_probed",
+          "level": "best-practice",
+          "subject": "resources/read",
+          "message": "resources/read hints not verified (read-only policy)",
+          "spec_url": null,
+          "evidence": null,
+          "tool": null,
+          "issue": "resources/read hints not verified (read-only policy)"
+        }
+      ],
+      "duration_ms": 42,
+      "requests": 0,
+      "error": null,
+      "severity": "must",
+      "passed": false
+    },
+    {
+      "name": "origin",
+      "title": "Forged Origin header rejected with HTTP 403",
+      "status": "pass",
+      "summary": "Origin header validated",
+      "details": "",
+      "spec_url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http",
+      "failures": [],
+      "warnings": [],
+      "info": [],
+      "duration_ms": 42,
+      "requests": 5,
+      "error": null,
+      "severity": null,
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "passed": 4,
+    "warned": 1,
+    "failed": 2,
+    "inconclusive": 1,
+    "errored": 0,
+    "skipped": [],
+    "exit_code": 1
+  }
+}

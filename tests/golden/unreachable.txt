@@ -1,0 +1,21 @@
+mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
+server: unreachable — cannot connect to https://api.example.com/mcp: ConnectError: All connection attempts failed
+
+E handshake     Error: cannot connect to https://api.example.com/mcp: ConnectError: All connection attempts failed
+    error: ServerUnreachable: cannot connect to https://api.example.com/mcp: ConnectError: All connection attempts failed
+E session       Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+E discover      Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+E protocol      Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+E schemas       Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+E errors        Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+E cache         Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+E origin        Error: not run: server unreachable (ConnectError)
+    error: RunAborted: not run: server unreachable (ConnectError)
+
+Run incomplete: 8 of 8 checks could not run (cannot connect to https://api.example.com/mcp: ConnectError: All connection attempts failed). See --json for details.

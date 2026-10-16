@@ -1,0 +1,150 @@
+# CI for mcpcheck: lint -> typecheck -> {test matrix, lowest-bounds, build smoke-test}.
+# Every third-party action is pinned to a full commit SHA (tag in the trailing comment);
+# Dependabot (github-actions ecosystem) keeps the SHA + comment in sync.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: true
+env:
+  UV_VERSION: "0.13.1"
+  FORCE_COLOR: "1"
+  PYTHONUNBUFFERED: "1"
+defaults:
+  run:
+    shell: bash
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "${{ env.UV_VERSION }}"
+          enable-cache: true
+          python-version: "3.14"
+      - run: uv lock --check
+      - run: uv sync --locked --only-group lint
+      - run: uv run --no-sync ruff check --output-format=github .
+      - run: uv run --no-sync ruff format --check --diff .
+      - name: README is PyPI-safe (dev mode)
+        run: uv run --no-sync python scripts/check_readme.py README.md
+      - name: zizmor (GitHub Actions security audit)
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: uvx zizmor@1.31.1 --min-severity=medium .github/workflows
+  typecheck:
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "${{ env.UV_VERSION }}"
+          enable-cache: true
+          python-version: "3.14"
+      - run: uv sync --locked
+      - run: uv run --no-sync mypy
+  test:
+    name: test (py${{ matrix.python-version }} · mcp ${{ matrix.mcp }} · ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: [lint, typecheck]
+    timeout-minutes: 20
+    continue-on-error: ${{ matrix.experimental == true }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        mcp: ["2.2.0", "latest"]
+        experimental: [false]
+        include:
+          - { os: macos-latest, python-version: "3.14", mcp: "latest", experimental: false }
+          - { os: windows-latest, python-version: "3.14", mcp: "latest", experimental: false }
+          - { os: ubuntu-latest, python-version: "3.15", mcp: "latest", experimental: true }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "${{ env.UV_VERSION }}"
+          enable-cache: true
+          python-version: "${{ matrix.python-version }}"
+      - name: Pin mcp for this matrix cell (re-lock, CI only)
+        env:
+          MCP_VERSION: "${{ matrix.mcp }}"
+        run: |
+          if [ "$MCP_VERSION" = "latest" ]; then uv lock --upgrade-package mcp; else uv lock --upgrade-package "mcp==$MCP_VERSION"; fi
+      - run: uv sync --no-default-groups --group test
+      - name: Show resolved versions
+        run: uv run --no-sync python -c 'import importlib.metadata as m; [print(f"{n:12s} {m.version(n)}") for n in ("mcp","mcp-types","httpx2","pydantic","anyio","click","rich","jsonschema")]'
+      - name: mcpcheck --version matches pyproject.toml
+        run: test "$(uv run --no-sync mcpcheck --version)" = "mcpcheck $(uv version --short)"
+      - name: pytest (JUnit + coverage XML)
+        env:
+          REPORT_TAG: "${{ matrix.os }}-py${{ matrix.python-version }}-mcp${{ matrix.mcp }}"
+        run: |
+          mkdir -p reports
+          uv run --no-sync pytest --junitxml="reports/junit-$REPORT_TAG.xml" --cov --cov-report=term-missing --cov-report="xml:reports/coverage-$REPORT_TAG.xml"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: "reports-${{ matrix.os }}-py${{ matrix.python-version }}-mcp${{ matrix.mcp }}"
+          path: reports/
+          if-no-files-found: error
+          retention-days: 14
+  lowest:
+    name: lowest direct bounds (py3.10, --resolution lowest-direct)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "${{ env.UV_VERSION }}"
+          enable-cache: true
+          python-version: "3.10"
+      - run: uv lock --resolution lowest-direct
+      - run: uv sync --no-default-groups --group test
+      - run: uv run --no-sync pytest -q
+  build:
+    name: build sdist + wheel, smoke-test
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "${{ env.UV_VERSION }}"
+          enable-cache: true
+          python-version: "3.14"
+      - run: uv build
+      - run: uvx twine@7.0.0 check --strict dist/*
+      - name: Wheel contains package data
+        run: unzip -l dist/*.whl | grep -E "mcpcheck/(schema/report.v1.json|py.typed)" | wc -l | grep -q 2
+      - name: Smoke-test the wheel in an isolated environment
+        run: test "$(uv run --isolated --no-project --with dist/*.whl -- mcpcheck --version)" = "mcpcheck $(uv version --short)"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
