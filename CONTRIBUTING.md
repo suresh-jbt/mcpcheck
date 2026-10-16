@@ -45,6 +45,21 @@ uv lock --upgrade-package "mcp==2.2.0" && uv sync && uv run pytest -q
 git checkout uv.lock && uv sync                       # back to the committed lock
 ```
 
+## Entry points
+
+`make` (or `make help`) lists every command in this document, and is the
+shortest path to the three you need most often:
+
+```shell
+make demo       # bash examples/demo.sh: mcpcheck against a conformant server, then a broken one
+make check      # lint + typecheck + test, in that order (what CI gates on)
+make help       # all targets, with one line each
+```
+
+`make` is a thin wrapper: every target is one line of real `uv run ...`
+commands, so you can always read the `Makefile` and run them by hand.
+`tests/test_examples.py` asserts that every documented target exists and
+that the README's `make help` block still matches the `Makefile`.
 ## Running the tests
 
 ```shell
@@ -79,6 +94,19 @@ The suite starts two in-repo servers on free ports:
   Every FAIL and WARN path in `mcpcheck` must be reproduced by one of its
   toggles. Run it with `uv run python -m tests.fixtures.misbehaving_server
   --port 0 --toggle NAME --set FIELD=VALUE`.
+
+A third in-repo server lives outside the test suite and is shipped for
+readers rather than for tests: `examples/demo_server.py`, the commented,
+fully conformant SDK server the one-command demo points `mcpcheck` at.
+`--break FEATURE` introduces one realistic non-conformance at a time, and
+the outcome table in `examples/README.md` is asserted row by row by
+`tests/test_examples.py` (which check moves, to which status, with which
+finding code). CI runs `timeout 120 bash examples/demo.sh` on every push, so
+a new check, a renamed finding code or a changed summary string can break
+the demo as well as the tests — run `make demo` before you push.
+`tests/test_readme_hero.py` rebuilds the exact misbehaving-server
+configuration behind the README's hero block and asserts the report still
+matches it character for character.
 
 Never bind a fixed port in tests: always bind `("127.0.0.1", 0)` and read the
 port back. Golden output files under `tests/golden/` are regenerated with
@@ -130,6 +158,11 @@ A check is one module in `src/mcpcheck/checks/`. To add one:
    run `uv run python scripts/gen_options_table.py README.md`), add a line
    under `[Unreleased]` in `CHANGELOG.md`, and run
    `uv run python scripts/check_readme.py README.md CHANGELOG.md CONTRIBUTING.md`.
+7. Keep the demo honest. If the new check can fail against a plausible
+   server, give `examples/demo_server.py` a `--break` feature for it, add
+   its row to the table in `examples/README.md` and its expectation to
+   `BREAK_EXPECTATIONS` in `tests/test_examples.py`; then `make demo` and
+   `uv run pytest tests/test_examples.py -q`.
 
 Things a check must **never** do: call a tool with arguments that satisfy its
 `inputSchema`, call `resources/read`, `prompts/get` or `subscriptions/listen`,
@@ -170,13 +203,17 @@ uv build && uvx twine@7.0.0 check --strict dist/*
    and commit.
 5. `git tag vX.Y.Z && git push --tags`. The release workflow verifies that the
    tag equals the project version, re-runs the tests and the README release
-   check, builds, publishes to TestPyPI, waits for approval of the `pypi`
-   environment, publishes to PyPI with Trusted Publishing (no API tokens) and
-   creates the GitHub release. Inspect the TestPyPI page rendering before
-   approving.
+   check, builds, validates the artefacts (`twine check --strict` plus an
+   isolated wheel smoke test), waits for approval of the `pypi` environment,
+   publishes to PyPI with Trusted Publishing (no API tokens) and creates the
+   GitHub release. There is no TestPyPI dry run — the name `mcpcheck` is taken
+   on test.pypi.org by an unrelated project — so read the build job's summary
+   before approving the `pypi` environment.
 6. Smoke-test the published package: `uvx mcpcheck@X.Y.Z --version` and
    `uvx mcpcheck@X.Y.Z http://127.0.0.1:<port>/mcp` against the reference
-   server must exit `0`. Confirm the badges render.
+   server must exit `0`. Confirm the badges render, and swap the README's
+   static "not yet on PyPI" status badge and Installation note for the real
+   PyPI badges (`img.shields.io/pypi/v`, `/pypi/pyversions`, `/pypi/l`).
 
 ## Code of conduct
 

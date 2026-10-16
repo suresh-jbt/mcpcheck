@@ -87,6 +87,33 @@ is listed under *Changed* or *Removed*.
   (`WALK_BYTE_BUDGET`) and the listing is reported as incomplete
   (inconclusive), so a server that stays under the 16 MiB per-request cap can
   no longer drive mcpcheck to multi-gigabyte memory use.
+- A runnable demo: `examples/demo_server.py` (a commented, fully conformant
+  2026-07-28 support-desk server on the official SDK, with `--break FEATURE`
+  for one realistic non-conformance at a time), `examples/demo.sh` and
+  `make demo` (one command: check the conformant server, then the same server
+  with `--break cache,origin,output-schema`), `examples/README.md` with the
+  verified table of what each flaw does to which check, a `Makefile` of the
+  usual entry points and a CI smoke step that runs the demo on every push.
+  The README is organised around it: a "Try it" block, an "Examples" section
+  of recipes (tokens, `--origin`, single-check loops, `--probe none`,
+  `--strict` gating, report diffing, `jq` one-liners, hooks, version pinning,
+  `-vv` debugging) and a "Fixing what it finds" section that pairs the most
+  common findings with the demo server's own code.
+- `.gitattributes` pins `eol=lf` for shell scripts and the `Makefile`, so a
+  Windows clone with Git's default `core.autocrlf=true` still gets a
+  `examples/demo.sh` that `bash` and shellcheck accept.
+- `examples/` is inside mypy's scope, so the demo server is held to the same
+  strict typing bar as the code it teaches.
+- `tests/test_readme_hero.py` rebuilds the misbehaving-server configuration
+  behind the README's hero block, re-runs all eight checks against it and
+  asserts the rendered report still matches the README character for
+  character. `tests/test_examples.py` additionally pins the README's
+  `make help` and `--list-breaks` blocks, every flag the docs pass to
+  `demo_server.py`, the demo's committed `100755` mode and the commands its
+  closing "Next" block hands over.
+- `examples/demo.sh` now exits `130`/`143` on SIGINT/SIGTERM (it used to clean
+  up and carry on, finishing with a misleading exit `0`), and derives its
+  per-flaw explanation lines from `BREAKS=` so the two cannot drift apart.
 
 ### Changed
 

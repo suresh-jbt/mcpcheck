@@ -1,0 +1,16 @@
+# Line endings. A Windows clone with core.autocrlf=true would otherwise check the
+# shell scripts out with CRLF, which breaks `bash -n`, shellcheck (SC1017) and the
+# shebang itself. Keep anything executed by a shell, or by `make`, LF on every OS.
+* text=auto
+
+*.sh text eol=lf
+Makefile text eol=lf
+*.py text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary assets: never line-ending-converted, never diffed as text.
+*.webp binary
+*.png binary
+*.jpg binary
