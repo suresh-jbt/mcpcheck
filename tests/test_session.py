@@ -1186,8 +1186,14 @@ async def test_fresh_connections(misbehaving_url: Callable[[Toggles], str]) -> N
     bogus = [e for e in posts if "mcp-session-id" in e["headers"]]
     assert len(bogus) == 1
     assert sum(1 for e in posts if e["client_port"] == bogus[0]["client_port"]) == 1
-    ports = sorted({e["client_port"] for e in posts if e["method"] != "server/discover"})
-    assert all(str(p) in result.details for p in ports[1:] if p != bogus[0]["client_port"])
+    # The run's first POST is the gate, on the shared "main" connection; every other
+    # port except the bogus-session probe is a connection the session check opened and
+    # must name in its details. Identify main by order, not by port number: Linux
+    # randomises ephemeral ports, so the first connection is not the lowest-numbered one.
+    main_port = min(posts, key=lambda e: e["n"])["client_port"]
+    fresh_ports = {e["client_port"] for e in posts} - {main_port, bogus[0]["client_port"]}
+    assert len(fresh_ports) == wire.SESSION_CONNECTIONS, sorted(fresh_ports)
+    assert all(str(p) in result.details for p in sorted(fresh_ports))
     assert result.requests == len(posts) - 1
 
 
