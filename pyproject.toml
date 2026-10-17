@@ -121,7 +121,10 @@ warn_required_dynamic_aliases = true
 [tool.pytest.ini_options]
 minversion = "9.0"
 testpaths = ["tests"]
-addopts = "-ra --strict-config --strict-markers -p anyio --import-mode=importlib"
+# `-m "not network"`: the live-spec-site tests are opt-in (`pytest -m network`), so a slow
+# or unreachable modelcontextprotocol.io can never fail a build. The weekly
+# .github/workflows/links.yml run is what catches link rot.
+addopts = "-ra --strict-config --strict-markers -p anyio --import-mode=importlib -m 'not network'"
 xfail_strict = true
 filterwarnings = ["error"]
 timeout = 60

@@ -91,8 +91,10 @@ jobs:
       - run: uv sync --no-default-groups --group test
       - name: Show resolved versions
         run: uv run --no-sync python -c 'import importlib.metadata as m; [print(f"{n:12s} {m.version(n)}") for n in ("mcp","mcp-types","httpx2","pydantic","anyio","click","rich","jsonschema")]'
+      # `--color never` is required: this job sets FORCE_COLOR=1, which makes uv wrap its
+      # output in ANSI codes (\e[36m0.1.0\e[39m) and the string comparison can never match.
       - name: mcpcheck --version matches pyproject.toml
-        run: test "$(uv run --no-sync mcpcheck --version)" = "mcpcheck $(uv version --short)"
+        run: test "$(uv run --no-sync mcpcheck --version)" = "mcpcheck $(uv version --short --color never)"
       - name: pytest (JUnit + coverage XML)
         env:
           REPORT_TAG: "${{ matrix.os }}-py${{ matrix.python-version }}-mcp${{ matrix.mcp }}"
@@ -142,7 +144,7 @@ jobs:
       - name: Wheel contains package data
         run: unzip -l dist/*.whl | grep -E "mcpcheck/(schema/report.v1.json|py.typed)" | wc -l | grep -q 2
       - name: Smoke-test the wheel in an isolated environment
-        run: test "$(uv run --isolated --no-project --with dist/*.whl -- mcpcheck --version)" = "mcpcheck $(uv version --short)"
+        run: test "$(uv run --isolated --no-project --with dist/*.whl -- mcpcheck --version)" = "mcpcheck $(uv version --short --color never)"
       - name: The one-command demo still works (examples/demo.sh)
         env:
           UV_NO_SYNC: "1"

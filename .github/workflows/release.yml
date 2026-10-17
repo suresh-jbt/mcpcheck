@@ -37,7 +37,7 @@ jobs:
         env:
           TAG: "${{ github.ref_name }}"
         run: |
-          version="$(uv version --short)"
+          version="$(uv version --short --color never)"
           [ "${TAG#v}" = "$version" ] || { echo "::error::tag '$TAG' != pyproject version '$version'"; exit 1; }
       - run: uv lock --check
       - run: uv sync --locked && uv run --no-sync pytest -q
