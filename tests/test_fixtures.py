@@ -1750,7 +1750,7 @@ def test_thread_server_starts_and_stops_without_leaks() -> None:
     before = {t.name for t in threading.enumerate() if t.name == "uvicorn-fixture"}
     server = start_misbehaving_server(Toggles())
     assert bool(server.running)  # bool(): keep mypy from narrowing the property
-    with httpx2.Client(timeout=5) as c:
+    with httpx2.Client(timeout=15) as c:
         assert (
             c.post(
                 server.url, headers=modern_headers("tools/list"), json=modern_body("tools/list")
@@ -1766,7 +1766,7 @@ def test_thread_server_starts_and_stops_without_leaks() -> None:
     assert after == before
     with (
         ThreadServer(reference_server.build_app(), lifespan="on") as ref,
-        httpx2.Client(timeout=5) as c,
+        httpx2.Client(timeout=15) as c,
     ):
         assert (
             c.post(
@@ -1809,7 +1809,7 @@ def test_standalone_entry_point_prints_url_and_serves(
         assert match is not None
         url, port = match.group(1), int(match.group(2))
         assert port != 0
-        with httpx2.Client(timeout=5) as c:
+        with httpx2.Client(timeout=15) as c:
             r = c.post(url, headers=modern_headers("tools/list"), json=modern_body("tools/list"))
         assert r.status_code == 200
         result = parse_reply(r)["result"]

@@ -46,8 +46,10 @@ ASGI_CLIENT_PORT = 40001
 ASGI_BASE_URL = "http://127.0.0.1:8000"
 """Base URL of ASGI clients; the Host header must carry a port for the SDK's guard (``127.0.0.1:*``)."""
 CLIENT_INFO: dict[str, str] = {"name": "mcpcheck-tests", "version": "0.0.0"}
-READINESS_TIMEOUT_S = 10.0
-SHUTDOWN_TIMEOUT_S = 5.0
+READINESS_TIMEOUT_S = 30.0
+FIXTURE_HTTP_TIMEOUT_S = 15.0
+"""Windows CI runners are markedly slower; a generous timeout cannot mask a failure."""
+SHUTDOWN_TIMEOUT_S = 15.0
 
 
 @pytest.fixture(scope="session")
@@ -167,7 +169,9 @@ class ThreadServer:
                 raise RuntimeError("uvicorn fixture thread died during startup")
             if time.monotonic() > deadline:
                 self.stop()
-                raise RuntimeError("uvicorn fixture did not start within 10 s")
+                raise RuntimeError(
+                    f"uvicorn fixture did not start within {READINESS_TIMEOUT_S:g} s"
+                )
             time.sleep(0.01)
         return self
 
@@ -178,7 +182,9 @@ class ThreadServer:
         if self._thread is not None:
             self._thread.join(SHUTDOWN_TIMEOUT_S)
             if self._thread.is_alive():
-                raise RuntimeError("uvicorn fixture thread did not stop within 5 s")
+                raise RuntimeError(
+                    f"uvicorn fixture thread did not stop within {SHUTDOWN_TIMEOUT_S:g} s"
+                )
         self._server, self._thread = None, None
 
     def __enter__(self) -> ThreadServer:
@@ -265,7 +271,7 @@ def _log_url(url: str) -> str:
 
 def fetch_request_log(url: str) -> list[dict[str, Any]]:
     """Return the misbehaving server's request log for the server behind ``url``."""
-    with httpx2.Client(timeout=5) as client:
+    with httpx2.Client(timeout=FIXTURE_HTTP_TIMEOUT_S) as client:
         response = client.get(_log_url(url))
         response.raise_for_status()
         entries: list[dict[str, Any]] = response.json()
@@ -274,7 +280,7 @@ def fetch_request_log(url: str) -> list[dict[str, Any]]:
 
 def reset_request_log(url: str) -> None:
     """Clear the misbehaving server's request log for the server behind ``url``."""
-    with httpx2.Client(timeout=5) as client:
+    with httpx2.Client(timeout=FIXTURE_HTTP_TIMEOUT_S) as client:
         client.delete(_log_url(url)).raise_for_status()
 
 

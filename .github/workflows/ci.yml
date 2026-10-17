@@ -112,7 +112,7 @@ jobs:
               for case in ET.parse(path).iter("testcase"):
                   for bad in list(case.findall("failure")) + list(case.findall("error")):
                       text = ((bad.get("message") or "") + "\n" + (bad.text or "")).strip()
-                      body = text.replace("%", "%25").replace("\r", "")[:900].replace("\n", "%0A")
+                      body = text.replace("%", "%25").replace("\r", "")[:1800].replace("\n", "%0A")
                       print(f'::error title={case.get("classname")}::{case.get("name")}: {body}')
           PY
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -13,6 +13,12 @@ is listed under *Changed* or *Removed*.
 
 ### Fixed
 
+- An unreachable host is reported as an error (exit 2) on Windows too. The total
+  request backstop and httpx's own connect timeout were armed at the same moment,
+  so the generic one usually won; Windows hangs rather than refusing a connection
+  to a dead port, which made every unreachable host look like a merely slow one
+  (exit 0). Connecting now gives up just inside the budget, while read and write
+  keep it in full.
 - A deeply nested JSON body now gets the same verdict on every Python. The parse
   previously relied on CPython raising `RecursionError`, whose threshold moved
   from 996 (3.10/3.11) to ~10000 (3.12/3.13) to a stack-dependent value in 3.14,

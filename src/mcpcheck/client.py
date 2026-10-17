@@ -91,6 +91,22 @@ class ClientConfig:
         return wire.secret_needles(values)
 
 
+_CONNECT_TIMEOUT_RATIO = 0.9
+"""Fraction of the request budget after which httpx2 gives up *connecting*.
+
+Only the connect phase is armed early. Read and write keep the full budget, so a
+server that accepts the connection and then stalls still produces the
+total-budget message the inconclusive verdicts are built on; but a connection
+that never establishes raises a typed ``ConnectTimeout`` first, which is the
+difference between "unreachable" (exit 2) and "slow" (inconclusive).
+
+Linux and macOS refuse a connection to a dead loopback port immediately, so the
+race never showed there. Windows hangs instead, and with both timers armed at
+the budget the generic backstop won: every unreachable host was reported as a
+slow server and the run exited 0 instead of 2.
+"""
+
+
 class ServerUnreachable(Exception):  # noqa: N818 — name fixed by PLAN.md §6.5
     """Connect refused / DNS / TLS / unsupported scheme: the run exits 2."""
 
@@ -284,7 +300,7 @@ class RawClient:
         self.send_token = send_token
         self._next_id = 1
         self._http = httpx2.AsyncClient(
-            timeout=httpx2.Timeout(cfg.timeout),
+            timeout=httpx2.Timeout(cfg.timeout, connect=cfg.timeout * _CONNECT_TIMEOUT_RATIO),
             verify=cfg.verify_tls,
             follow_redirects=False,
             transport=transport,
@@ -489,11 +505,15 @@ class RawClient:
         acc = _Accum()
         t0 = time.perf_counter()
         unreachable: BaseException | None = None
+        limit = budget if budget is not None else self.cfg.timeout
         try:
-            with anyio.fail_after(budget if budget is not None else self.cfg.timeout):
+            # httpx2 gives up connecting just inside this budget (see _CONNECT_TIMEOUT_RATIO),
+            # so an unreachable host surfaces as a typed ConnectTimeout rather than as this
+            # generic backstop -- without extending the wall-clock contract.
+            with anyio.fail_after(limit):
                 await self._send(verb, url, headers, content, rid, acc, wait_for_eof, headers_only)
         except TimeoutError:
-            acc.error = f"request exceeded the {budget or self.cfg.timeout:g}s total budget"
+            acc.error = f"request exceeded the {limit:g}s total budget"
         except (httpx2.ConnectError, httpx2.ConnectTimeout, httpx2.UnsupportedProtocol) as exc:
             unreachable = exc
             acc.error = f"{type(exc).__name__}: {exc}"

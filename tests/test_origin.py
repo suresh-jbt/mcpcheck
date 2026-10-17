@@ -872,7 +872,7 @@ async def test_fresh_connections_tcp(misbehaving_url: Callable[[Toggles], str]) 
     url = misbehaving_url(Toggles())
     result, transcript, _ = await run_origin(ClientConfig(url=url))
     assert result.status is Status.PASS, result.summary
-    with httpx2.Client(timeout=5) as client:
+    with httpx2.Client(timeout=15) as client:
         log = client.get(url.replace("/mcp", "/__log")).json()
     assert [(e["verb"], e["method"]) for e in log] == [("POST", PROBE_METHOD)] * 4 + [
         ("OPTIONS", None)
@@ -908,7 +908,7 @@ async def test_warn_redirect_tcp(misbehaving_url: Callable[[Toggles], str]) -> N
     url = misbehaving_url(Toggles(origin_mode="redirect_evil"))
     result, _, _ = await run_origin(ClientConfig(url=url))
     assert codes_of(result) == {"origin.evil_redirected": Level.SHOULD}
-    with httpx2.Client(timeout=5) as client:
+    with httpx2.Client(timeout=15) as client:
         log = client.get(url.replace("/mcp", "/__log")).json()
     assert all(e["verb"] != "GET" for e in log)
     assert all(e["path"] == "/mcp" for e in log)  # the redirect target was never requested

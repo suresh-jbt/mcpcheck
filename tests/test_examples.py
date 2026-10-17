@@ -228,11 +228,17 @@ def test_demo_sh_is_executable_on_posix() -> None:
 @pytest.mark.skipif(shutil.which("bash") is None, reason="bash is not installed")
 def test_demo_sh_parses_as_bash() -> None:
     """``examples/demo.sh`` parses; a CRLF checkout would fail here (SC1017)."""
-    subprocess.run(  # noqa: S603 - fixed argv, no shell
+    proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
         ["bash", "-n", str(DEMO_SH)],  # noqa: S607 - bash is resolved from PATH on purpose
-        check=True,
+        check=False,
+        capture_output=True,
+        text=True,
         timeout=CLI_TIMEOUT_S,
     )
+    # Show what bash objected to: on Windows this is the difference between a CRLF
+    # checkout (SC1017) and a real syntax error, and CI job logs are admin-only.
+    crlf = b"\r\n" in DEMO_SH.read_bytes()
+    assert proc.returncode == 0, f"bash -n failed (CRLF in working tree: {crlf})\n{proc.stderr}"
 
 
 @pytest.mark.skipif(shutil.which("git") is None, reason="git is not installed")
