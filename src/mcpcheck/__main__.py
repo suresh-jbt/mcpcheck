@@ -448,7 +448,10 @@ def _run(
 ) -> Report | None:
     """Drive the runner under anyio (spinner on a TTY stderr); returns ``None`` on SIGINT."""
     status_ctx: Status | None = None
-    if not quiet and err_console.is_terminal:
+    # `Console.is_terminal` is True whenever FORCE_COLOR is set -- which CI runners
+    # commonly do -- so gating on it animates the spinner into a redirected log.
+    # Colour still follows FORCE_COLOR/NO_COLOR; only the animation needs a real TTY.
+    if not quiet and sys.stderr.isatty():
         status_ctx = err_console.status("starting…", spinner="dots")
         status_ctx.start()
 

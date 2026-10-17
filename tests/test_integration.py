@@ -144,7 +144,9 @@ def validate_report_json(text: str) -> dict[str, Any]:
 
 def cli(*args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     """Run ``python -m mcpcheck`` with a clean environment (no colour, no inherited token)."""
-    full_env = {**os.environ, "NO_COLOR": "1", "PYTHONIOENCODING": "utf-8", **(env or {})}
+    full_env = {**os.environ, "NO_COLOR": "1", "PYTHONIOENCODING": "utf-8"}
+    full_env.pop("FORCE_COLOR", None)  # CI sets it; tests must see a clean environment...
+    full_env.update(env or {})  # ...unless the test sets it deliberately
     if env is None or "MCPCHECK_TOKEN" not in env:
         full_env.pop("MCPCHECK_TOKEN", None)
     return subprocess.run(  # noqa: S603 - fixed argv, our own module
@@ -909,6 +911,19 @@ def test_no_fixture_thread_survives_a_stopped_server() -> None:
 
 
 # --------------------------------------------------------------------------- CLI end to end
+
+
+def test_cli_writes_nothing_to_stderr_even_with_force_color(reference_url: str) -> None:
+    """A redirected stderr must stay clean: FORCE_COLOR must not start the spinner.
+
+    Regression: rich reports ``is_terminal`` as True whenever FORCE_COLOR is set, so
+    gating the progress animation on it spat ``\x1b[?25l(spinner) running origin...``
+    into every redirected log, and broke this suite on GitHub Actions, which sets
+    FORCE_COLOR=1 for every job.
+    """
+    proc = cli(reference_url, env={"FORCE_COLOR": "1"})
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stderr == ""
 
 
 def test_cli_reference_exit_0(reference_url: str) -> None:

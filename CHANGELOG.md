@@ -11,6 +11,14 @@ is listed under *Changed* or *Removed*.
 
 ## [Unreleased]
 
+### Fixed
+
+- The progress spinner is no longer animated into a redirected stderr. It was
+  gated on rich's `is_terminal`, which is true whenever `FORCE_COLOR` is set --
+  as GitHub Actions and many CI runners do -- so `mcpcheck ... 2> log` wrote
+  escape sequences into the log. An animation now requires a real TTY; colour
+  still follows `FORCE_COLOR`/`NO_COLOR`.
+
 ### Added
 
 - Eight read-only conformance checks against the MCP 2026-07-28 revision over
