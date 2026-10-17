@@ -1760,7 +1760,9 @@ def test_thread_server_starts_and_stops_without_leaks() -> None:
     port = server.port
     server.stop()
     assert not server.running
-    with pytest.raises(ConnectionRefusedError):
+    # Linux and macOS refuse a connection to a port nothing listens on; Windows lets it
+    # hang until the timeout. Either proves the listener is gone.
+    with pytest.raises((ConnectionRefusedError, TimeoutError, OSError)):
         socket.create_connection(("127.0.0.1", port), timeout=0.5)
     after = {t.name for t in threading.enumerate() if t.name == "uvicorn-fixture"}
     assert after == before

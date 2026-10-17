@@ -359,7 +359,8 @@ def test_verbose_transcript_on_stderr_only() -> None:
     assert result.exit_code == 2
     assert "# check: handshake  conn=handshake" in result.stderr
     assert "> 1 POST http://127.0.0.1:1/mcp  tools/list" in result.stderr
-    assert "< 1 ERROR ConnectError" in result.stderr
+    # Windows reports a dead port as a connect timeout rather than a refusal.
+    assert any(f"< 1 ERROR {k}" in result.stderr for k in ("ConnectError", "ConnectTimeout"))
     assert "# check" not in result.stdout
 
 

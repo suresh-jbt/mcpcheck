@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import contextlib
 import socket
+import sys
 import threading
 import time
 from typing import TYPE_CHECKING, Any, Literal
@@ -50,6 +51,23 @@ READINESS_TIMEOUT_S = 30.0
 FIXTURE_HTTP_TIMEOUT_S = 15.0
 """Windows CI runners are markedly slower; a generous timeout cannot mask a failure."""
 SHUTDOWN_TIMEOUT_S = 15.0
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Downgrade unraisable-exception warnings to warnings on Windows.
+
+    ``filterwarnings = ["error"]`` is deliberate everywhere else. On Windows the
+    asyncio proactor event loop raises from ``_ProactorBasePipeTransport.__del__``
+    while the garbage collector is closing the fixture servers' sockets, long after
+    the request under test finished. pytest surfaces that as
+    ``PytestUnraisableExceptionWarning``, so unrelated tests failed with
+    "multiple unraisable exception warnings" depending on when a collection ran.
+    The appended filter wins over the ``error`` entry because it comes later.
+    """
+    if sys.platform == "win32":  # pragma: no cover - platform dependent
+        config.addinivalue_line(
+            "filterwarnings", "default::pytest.PytestUnraisableExceptionWarning"
+        )
 
 
 @pytest.fixture(scope="session")

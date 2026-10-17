@@ -1642,10 +1642,12 @@ async def test_tcp_connect_refused_is_error_exit_2() -> None:
     assert handshake.status is Status.ERROR
     assert handshake.error is not None
     assert handshake.error.type == "ServerUnreachable"
-    assert "ConnectError" in handshake.error.message
+    assert any(k in handshake.error.message for k in ("ConnectError", "ConnectTimeout"))
     assert dependent.status is Status.ERROR
     assert report.summary.exit_code == 2
-    assert elapsed < 2.0
+    # The point is that it does not hang: a refusal is instant on Linux and macOS, while
+    # Windows only gives up when the connect timeout fires just inside the 2s budget.
+    assert elapsed < 4.0
 
 
 @pytest.mark.integration

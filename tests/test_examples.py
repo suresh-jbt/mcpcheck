@@ -225,11 +225,41 @@ def test_demo_sh_is_executable_on_posix() -> None:
     assert DEMO_SH.stat().st_mode & 0o111, "examples/demo.sh is not executable (chmod +x)"
 
 
-@pytest.mark.skipif(shutil.which("bash") is None, reason="bash is not installed")
+def _working_bash() -> str | None:
+    """A ``bash`` that can actually run a script, or ``None``.
+
+    ``shutil.which("bash")`` on a Windows runner finds ``System32\\bash.exe``, the WSL
+    launcher, which exits 1 with "no installed distributions" (in UTF-16) for any
+    argument. Git for Windows ships a real bash elsewhere.
+    """
+    candidates = [shutil.which("bash")]
+    if sys.platform == "win32":
+        candidates += [
+            r"C:\Program Files\Git\bin\bash.exe",
+            r"C:\Program Files\Git\usr\bin\bash.exe",
+        ]
+    for candidate in candidates:
+        if not candidate or not Path(candidate).exists():
+            continue
+        try:
+            probe = subprocess.run(  # noqa: S603 - fixed argv, no shell
+                [candidate, "-c", "echo ok"], check=False, capture_output=True, timeout=30
+            )
+        except OSError:  # pragma: no cover - platform dependent
+            continue
+        if probe.returncode == 0 and probe.stdout.strip() == b"ok":
+            return candidate
+    return None
+
+
+BASH = _working_bash()
+
+
+@pytest.mark.skipif(BASH is None, reason="no usable bash (the Windows WSL stub does not count)")
 def test_demo_sh_parses_as_bash() -> None:
     """``examples/demo.sh`` parses; a CRLF checkout would fail here (SC1017)."""
     proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
-        ["bash", "-n", str(DEMO_SH)],  # noqa: S607 - bash is resolved from PATH on purpose
+        [BASH or "bash", "-n", str(DEMO_SH)],
         check=False,
         capture_output=True,
         text=True,
