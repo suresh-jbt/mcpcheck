@@ -101,6 +101,20 @@ jobs:
         run: |
           mkdir -p reports
           uv run --no-sync pytest --junitxml="reports/junit-$REPORT_TAG.xml" --cov --cov-report=term-missing --cov-report="xml:reports/coverage-$REPORT_TAG.xml"
+      # Job logs need repository-admin rights to download, so surface each failing test as
+      # a GitHub annotation: those are readable by anyone and show up on the run summary.
+      - name: Annotate failing tests
+        if: failure()
+        run: |
+          python - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          for path in sorted(glob.glob("reports/junit-*.xml")):
+              for case in ET.parse(path).iter("testcase"):
+                  for bad in list(case.findall("failure")) + list(case.findall("error")):
+                      text = ((bad.get("message") or "") + "\n" + (bad.text or "")).strip()
+                      body = text.replace("%", "%25").replace("\r", "")[:900].replace("\n", "%0A")
+                      print(f'::error title={case.get("classname")}::{case.get("name")}: {body}')
+          PY
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
