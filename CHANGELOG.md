@@ -11,25 +11,7 @@ is listed under *Changed* or *Removed*.
 
 ## [Unreleased]
 
-### Fixed
-
-- An unreachable host is reported as an error (exit 2) on Windows too. The total
-  request backstop and httpx's own connect timeout were armed at the same moment,
-  so the generic one usually won; Windows hangs rather than refusing a connection
-  to a dead port, which made every unreachable host look like a merely slow one
-  (exit 0). Connecting now gives up just inside the budget, while read and write
-  keep it in full.
-- A deeply nested JSON body now gets the same verdict on every Python. The parse
-  previously relied on CPython raising `RecursionError`, whose threshold moved
-  from 996 (3.10/3.11) to ~10000 (3.12/3.13) to a stack-dependent value in 3.14,
-  so the same hostile response was reported as "JSON nests too deeply" on one
-  interpreter and "JSON array" on another. mcpcheck now applies its own bound
-  (`wire.MAX_JSON_DEPTH`, 512), which no real result approaches.
-- The progress spinner is no longer animated into a redirected stderr. It was
-  gated on rich's `is_terminal`, which is true whenever `FORCE_COLOR` is set --
-  as GitHub Actions and many CI runners do -- so `mcpcheck ... 2> log` wrote
-  escape sequences into the log. An animation now requires a real TTY; colour
-  still follows `FORCE_COLOR`/`NO_COLOR`.
+## [0.1.0] - 2026-10-17
 
 ### Added
 
@@ -165,6 +147,26 @@ is listed under *Changed* or *Removed*.
   (`PYTHONIOENCODING=ascii`): non-encodable characters are escaped and the
   JSON report is written with ASCII escapes, never a crash.
 
+### Fixed
+
+- An unreachable host is reported as an error (exit 2) on Windows too. The total
+  request backstop and httpx's own connect timeout were armed at the same moment,
+  so the generic one usually won; Windows hangs rather than refusing a connection
+  to a dead port, which made every unreachable host look like a merely slow one
+  (exit 0). Connecting now gives up just inside the budget, while read and write
+  keep it in full.
+- A deeply nested JSON body now gets the same verdict on every Python. The parse
+  previously relied on CPython raising `RecursionError`, whose threshold moved
+  from 996 (3.10/3.11) to ~10000 (3.12/3.13) to a stack-dependent value in 3.14,
+  so the same hostile response was reported as "JSON nests too deeply" on one
+  interpreter and "JSON array" on another. mcpcheck now applies its own bound
+  (`wire.MAX_JSON_DEPTH`, 512), which no real result approaches.
+- The progress spinner is no longer animated into a redirected stderr. It was
+  gated on rich's `is_terminal`, which is true whenever `FORCE_COLOR` is set --
+  as GitHub Actions and many CI runners do -- so `mcpcheck ... 2> log` wrote
+  escape sequences into the log. An animation now requires a real TTY; colour
+  still follows `FORCE_COLOR`/`NO_COLOR`.
+
 ### Security
 
 - The `--token` and every `-H` value, in literal, URL-encoded and Base64
@@ -184,4 +186,5 @@ is listed under *Changed* or *Removed*.
   line/paragraph separators and the BOM in server-controlled text (Trojan-Source
   style reordering), in addition to C0/C1 controls.
 
-[Unreleased]: https://github.com/suresh-jbt/mcpcheck/commits/main
+[Unreleased]: https://github.com/suresh-jbt/mcpcheck/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/suresh-jbt/mcpcheck/releases/tag/v0.1.0

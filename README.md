@@ -2,18 +2,16 @@
 
 # mcpcheck
 
-[![Status: 0.1.0, not yet on PyPI](https://img.shields.io/badge/status-0.1.0%20not%20yet%20on%20PyPI-orange)](https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md)
-[![Python 3.10 to 3.14](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue)](https://github.com/suresh-jbt/mcpcheck/blob/main/pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/jbt-mcpcheck.svg)](https://pypi.org/project/jbt-mcpcheck/)
+[![Python versions](https://img.shields.io/pypi/pyversions/jbt-mcpcheck.svg)](https://pypi.org/project/jbt-mcpcheck/)
 [![CI](https://github.com/suresh-jbt/mcpcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/suresh-jbt/mcpcheck/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/suresh-jbt/mcpcheck/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/pypi/l/jbt-mcpcheck.svg)](https://github.com/suresh-jbt/mcpcheck/blob/main/LICENSE)
 [![MCP spec 2026-07-28](https://img.shields.io/badge/MCP%20spec-2026--07--28-blue)](https://modelcontextprotocol.io/specification/2026-07-28)
 
 Check that an MCP server conforms to the **2026-07-28** revision of the [Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28) over Streamable HTTP. Read-only. Zero config. One command.
 
-> **Status:** 0.1.0 is finished and tested but **not published to PyPI yet**, so every command here runs from a clone (`uv run mcpcheck <url>`) until the first release lands — see [Installation](#installation).
-
 ```console
-$ uv run mcpcheck https://api.example.com/mcp
+$ mcpcheck https://api.example.com/mcp
 mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
 server: mcpcheck-misbehaving-server 0.1.0 · speaks 2026-07-28 · 8 checks
 
@@ -89,7 +87,7 @@ origin	fail	origin.evil_accepted
 
 `examples/demo_server.py` exists to be read: every block that is there *because the specification requires it* carries a one-line comment naming the requirement, and `--break FEATURE` introduces one realistic non-conformance at a time (`uv run python examples/demo_server.py --list-breaks`). [`examples/README.md`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/README.md) tabulates exactly which check, status and finding code each flaw produces.
 
-To point `mcpcheck` at a server of your own, `uv run mcpcheck http://127.0.0.1:8000/mcp` inside that clone is the whole command; once 0.1.0 is on PyPI, `uvx jbt-mcpcheck <url>` will need no clone at all.
+To point `mcpcheck` at a server of your own, `uvx jbt-mcpcheck http://127.0.0.1:8000/mcp` is the whole command — no clone, nothing installed.
 
 > Every `console` block in this README is real output. A line that is only `…` marks output elided for brevity, and server URLs are sometimes rewritten.
 
@@ -107,16 +105,6 @@ A server written for 2025-11-25 still answers `initialize` and looks healthy in 
 
 ## Installation
 
-**0.1.0 is not on PyPI yet.** Until it is published, run `mcpcheck` from a clone — which is also what [Try it](#try-it) above does:
-
-```shell
-git clone https://github.com/suresh-jbt/mcpcheck && cd mcpcheck
-uv sync
-uv run mcpcheck https://api.example.com/mcp
-```
-
-Once 0.1.0 is published, no clone is needed and any of these works:
-
 ```shell
 uvx jbt-mcpcheck https://api.example.com/mcp        # run without installing (uv)
 pipx run jbt-mcpcheck https://api.example.com/mcp   # pipx
@@ -128,9 +116,15 @@ The package is published as **`jbt-mcpcheck`** because PyPI considers `mcpcheck`
 similar to an unrelated project named `mcp-check`. Installing it gives you the
 **`mcpcheck`** command, which is what every example below uses.
 
-Requires Python 3.10 or newer (3.10 support ends at 1.0 or when the `mcp` SDK drops it, whichever comes first) and is built on the official [`mcp`](https://pypi.org/project/mcp/) Python SDK (2.x). Pin a version in CI with `uvx jbt-mcpcheck@0.1.0` (once it is on PyPI).
+Requires Python 3.10 or newer (3.10 support ends at 1.0 or when the `mcp` SDK drops it, whichever comes first) and is built on the official [`mcp`](https://pypi.org/project/mcp/) Python SDK (2.x). Pin a version in CI with `uvx jbt-mcpcheck@0.1.0`.
 
-Every recipe from here on writes a bare `mcpcheck`, the form you get once it is installed. Inside a clone, prefix it with `uv run`: `uv run mcpcheck https://api.example.com/mcp`.
+To work on `mcpcheck` itself, clone it instead and prefix the commands with `uv run` — which is what [Try it](#try-it) above does:
+
+```shell
+git clone https://github.com/suresh-jbt/mcpcheck && cd mcpcheck
+uv sync
+uv run mcpcheck https://api.example.com/mcp
+```
 
 ## Quick start
 
