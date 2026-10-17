@@ -33,6 +33,9 @@ is listed under *Changed* or *Removed*.
 
 ### Added
 
+- Published on PyPI as `jbt-mcpcheck`; the installed command is `mcpcheck` (a
+  `jbt-mcpcheck` alias exists so `uvx jbt-mcpcheck <url>` works without `--from`).
+  PyPI rejects `mcpcheck` itself as too similar to the unrelated `mcp-check`.
 - Eight read-only conformance checks against the MCP 2026-07-28 revision over
   Streamable HTTP, run in a fixed order: `handshake`, `session`, `discover`,
   `protocol`, `schemas`, `errors`, `cache`, `origin`. `handshake` gates the

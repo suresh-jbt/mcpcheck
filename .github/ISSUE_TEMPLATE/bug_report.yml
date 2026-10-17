@@ -64,5 +64,5 @@ body:
       options:
         - label: I removed the token and any other secret from everything pasted above.
           required: true
-        - label: I reproduced this with the newest release (`uvx mcpcheck@latest`).
+        - label: I reproduced this with the newest release (`uvx jbt-mcpcheck@latest`).
           required: false

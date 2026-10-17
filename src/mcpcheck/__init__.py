@@ -3,7 +3,7 @@
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("mcpcheck")
+    __version__ = version("jbt-mcpcheck")  # distribution name; the command is `mcpcheck`
 except PackageNotFoundError:  # pragma: no cover - only in a bare checkout
     __version__ = "0+unknown"
 

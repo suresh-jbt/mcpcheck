@@ -27,7 +27,7 @@ release once 0.1.0 is on PyPI (it is not yet):
 
 ```shell
 MCPCHECK=mcpcheck bash examples/demo.sh                # an mcpcheck on PATH
-MCPCHECK="uvx mcpcheck@0.1.0" bash examples/demo.sh    # once 0.1.0 is published
+MCPCHECK="uvx jbt-mcpcheck@0.1.0" bash examples/demo.sh    # once 0.1.0 is published
 ```
 
 ## What the demo server is
@@ -95,7 +95,7 @@ uv run mcpcheck https://api.example.com/mcp -vv                # every HTTP exch
 ```
 
 `uv run` is the in-clone form. Once 0.1.0 is on PyPI the same commands work as
-`uvx mcpcheck <url>` with nothing cloned and nothing installed.
+`uvx jbt-mcpcheck <url>` with nothing cloned and nothing installed.
 
 A good way to work through the findings is to keep `examples/demo_server.py` open next to
 your own: for every check you fail, the demo server shows the few lines that satisfy it.

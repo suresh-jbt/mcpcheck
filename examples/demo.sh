@@ -10,7 +10,7 @@
 # Needs nothing but `uv` inside a clone of https://github.com/suresh-jbt/mcpcheck.
 # Override the command under test with MCPCHECK, e.g.
 #   MCPCHECK=mcpcheck bash examples/demo.sh                  # an mcpcheck on PATH
-#   MCPCHECK="uvx mcpcheck@0.1.0" bash examples/demo.sh      # once 0.1.0 is on PyPI
+#   MCPCHECK="uvx jbt-mcpcheck@0.1.0" bash examples/demo.sh      # once 0.1.0 is on PyPI
 set -euo pipefail
 
 BREAKS="cache,origin,output-schema"
@@ -31,7 +31,7 @@ elif [ -f "$repo/pyproject.toml" ] && command -v uv >/dev/null 2>&1; then
 elif command -v mcpcheck >/dev/null 2>&1; then
   mcpcheck=(mcpcheck)                         # installed on PATH
 elif command -v uvx >/dev/null 2>&1; then
-  mcpcheck=(uvx mcpcheck)                     # from PyPI, nothing installed
+  mcpcheck=(uvx jbt-mcpcheck)                     # from PyPI, nothing installed
 else
   die "no mcpcheck found. Install uv (https://docs.astral.sh/uv/) or set MCPCHECK=..."
 fi

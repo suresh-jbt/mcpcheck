@@ -209,8 +209,8 @@ uv build && uvx twine@7.0.0 check --strict dist/*
    GitHub release. There is no TestPyPI dry run — the name `mcpcheck` is taken
    on test.pypi.org by an unrelated project — so read the build job's summary
    before approving the `pypi` environment.
-6. Smoke-test the published package: `uvx mcpcheck@X.Y.Z --version` and
-   `uvx mcpcheck@X.Y.Z http://127.0.0.1:<port>/mcp` against the reference
+6. Smoke-test the published package: `uvx jbt-mcpcheck@X.Y.Z --version` and
+   `uvx jbt-mcpcheck@X.Y.Z http://127.0.0.1:<port>/mcp` against the reference
    server must exit `0`. Confirm the badges render, and swap the README's
    static "not yet on PyPI" status badge and Installation note for the real
    PyPI badges (`img.shields.io/pypi/v`, `/pypi/pyversions`, `/pypi/l`).

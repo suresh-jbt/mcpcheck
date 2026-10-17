@@ -228,7 +228,7 @@ def test_every_spec_url_is_a_verified_constant() -> None:
 
 def test_readme_pins_the_current_version() -> None:
     text = _readme()
-    assert f"uvx mcpcheck@{__version__}" in text
+    assert f"uvx jbt-mcpcheck@{__version__}" in text
     assert f"mcpcheck {__version__} · MCP 2026-07-28 ·" in text
 
 

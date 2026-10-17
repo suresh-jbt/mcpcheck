@@ -89,7 +89,7 @@ origin	fail	origin.evil_accepted
 
 `examples/demo_server.py` exists to be read: every block that is there *because the specification requires it* carries a one-line comment naming the requirement, and `--break FEATURE` introduces one realistic non-conformance at a time (`uv run python examples/demo_server.py --list-breaks`). [`examples/README.md`](https://github.com/suresh-jbt/mcpcheck/blob/main/examples/README.md) tabulates exactly which check, status and finding code each flaw produces.
 
-To point `mcpcheck` at a server of your own, `uv run mcpcheck http://127.0.0.1:8000/mcp` inside that clone is the whole command; once 0.1.0 is on PyPI, `uvx mcpcheck <url>` will need no clone at all.
+To point `mcpcheck` at a server of your own, `uv run mcpcheck http://127.0.0.1:8000/mcp` inside that clone is the whole command; once 0.1.0 is on PyPI, `uvx jbt-mcpcheck <url>` will need no clone at all.
 
 > Every `console` block in this README is real output. A line that is only `…` marks output elided for brevity, and server URLs are sometimes rewritten.
 
@@ -118,13 +118,17 @@ uv run mcpcheck https://api.example.com/mcp
 Once 0.1.0 is published, no clone is needed and any of these works:
 
 ```shell
-uvx mcpcheck https://api.example.com/mcp        # run without installing (uv)
-pipx run mcpcheck https://api.example.com/mcp   # pipx
-uv tool install mcpcheck                        # or install as a tool
-pip install mcpcheck
+uvx jbt-mcpcheck https://api.example.com/mcp        # run without installing (uv)
+pipx run jbt-mcpcheck https://api.example.com/mcp   # pipx
+uv tool install jbt-mcpcheck                        # or install as a tool
+pip install jbt-mcpcheck
 ```
 
-Requires Python 3.10 or newer (3.10 support ends at 1.0 or when the `mcp` SDK drops it, whichever comes first) and is built on the official [`mcp`](https://pypi.org/project/mcp/) Python SDK (2.x). Pin a version in CI with `uvx mcpcheck@0.1.0` (once it is on PyPI).
+The package is published as **`jbt-mcpcheck`** because PyPI considers `mcpcheck` too
+similar to an unrelated project named `mcp-check`. Installing it gives you the
+**`mcpcheck`** command, which is what every example below uses.
+
+Requires Python 3.10 or newer (3.10 support ends at 1.0 or when the `mcp` SDK drops it, whichever comes first) and is built on the official [`mcp`](https://pypi.org/project/mcp/) Python SDK (2.x). Pin a version in CI with `uvx jbt-mcpcheck@0.1.0` (once it is on PyPI).
 
 Every recipe from here on writes a bare `mcpcheck`, the form you get once it is installed. Inside a clone, prefix it with `uv run`: `uv run mcpcheck https://api.example.com/mcp`.
 
@@ -366,7 +370,7 @@ If no server is running locally, keep the check in CI instead, where the job can
 ### Pin the version in CI
 
 ```shell
-uvx mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
+uvx jbt-mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
 ```
 
 New checks and new findings arrive in minor releases, so an unpinned `mcpcheck` can start failing a pull request that did not touch the server. Pin it, read the [changelog](https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md) when you bump it, and keep the report as a build artifact: it records `mcpcheck_version`, `sdk_version` and `spec_revision`, so an old verdict stays explainable.
@@ -717,7 +721,7 @@ jobs:
       - name: Check conformance with MCP 2026-07-28
         env:
           MCPCHECK_TOKEN: ${{ secrets.MCP_TEST_TOKEN }}   # omit for unauthenticated servers
-        run: uvx mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
+        run: uvx jbt-mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
       - uses: actions/upload-artifact@v7
         if: always()
         with: {name: mcpcheck-report, path: mcpcheck.json}

@@ -3,7 +3,7 @@
 ## Supported versions
 
 Only the newest release of `mcpcheck` receives fixes. Reproduce against it
-(`uvx mcpcheck@latest --version`) before reporting.
+(`uvx jbt-mcpcheck@latest --version`) before reporting.
 
 | Version | Supported |
 |---------|-----------|

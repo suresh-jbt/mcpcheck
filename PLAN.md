@@ -2,6 +2,11 @@
 
 **Status:** Draft v1 · 2026-10-16 · targets MCP revision **2026-07-28** · `mcp` SDK `>=2.2,<3` (verified on 2.2.0 and 2.3.0) · Python 3.10–3.14
 
+> **Superseded since this plan was written:** the PyPI distribution is `jbt-mcpcheck`,
+> not `mcpcheck` — PyPI rejects the latter as too similar to the unrelated `mcp-check`
+> project. The command, the import package and the GitHub repository are all still
+> `mcpcheck`; install commands below are historical.
+
 **How to read this document.** Sections 1–4 are for the decision maker: what is being built, what the user must still decide (§2), and where the plan knowingly departs from the handoff (§3). Section 5 is the normative register every verdict is traced to. Sections 6–9 are the engineering contract (architecture, one subsection per check, CLI/JSON contract, safety model); they are written so that a developer can implement a file from its subsection alone. Sections 10–13 are the delivery plan (tests, packaging, docs, milestones). Appendices hold the verified SDK facts, the URL map and the reviewer resolution log. Conventions: `T:` `B:` `V:` `DI:` `TL:` `R:` `P:` `CA:` `PG:` `CL:` `DP:` `SBP:` `TI:` `SCH:` `LG:` are the saved spec pages (`scratchpad/spec/md_basic_transports_streamable-http.md`, `md_basic_index.md`, `md_basic_versioning.md`, `md_server_discover.md`, `md_server_tools.md`, `md_server_resources.md`, `md_server_prompts.md`, `md_server_utilities_caching.md`, `md_server_utilities_pagination.md`, `md_changelog.md`, `md_deprecated.md`, `md_security_best_practices.md`, `md_basic_transports_index.md`, `schema.txt`, and `agents/synthesizer/logging.md` fetched today) with `cat -n` line numbers; every normative quote also carries its public `URL#anchor` (Appendix B). Anything not executed or fetched is marked **UNVERIFIED**. Code blocks are skeletons and signatures, not implementations.
 
 ---

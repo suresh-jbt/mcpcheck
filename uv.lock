@@ -587,6 +587,93 @@ wheels = [
 ]
 
 [[package]]
+name = "jbt-mcpcheck"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "anyio" },
+    { name = "click" },
+    { name = "httpx2" },
+    { name = "jsonschema" },
+    { name = "mcp" },
+    { name = "pydantic" },
+    { name = "rich" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "pytest-xdist" },
+    { name = "readme-renderer", extra = ["md"] },
+    { name = "ruff" },
+    { name = "starlette", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "starlette", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "types-jsonschema" },
+    { name = "uvicorn" },
+]
+lint = [
+    { name = "readme-renderer", extra = ["md"] },
+    { name = "ruff" },
+]
+test = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "pytest-xdist" },
+    { name = "starlette", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "starlette", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "uvicorn" },
+]
+typecheck = [
+    { name = "mypy" },
+    { name = "types-jsonschema" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4.9" },
+    { name = "click", specifier = ">=8.2" },
+    { name = "httpx2", specifier = ">=2.10" },
+    { name = "jsonschema", specifier = ">=4.20" },
+    { name = "mcp", specifier = ">=2.2,<3" },
+    { name = "pydantic", specifier = ">=2.12" },
+    { name = "rich", specifier = ">=13.9.4" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=2.0" },
+    { name = "pytest", specifier = ">=9" },
+    { name = "pytest-cov", specifier = ">=6.0" },
+    { name = "pytest-timeout", specifier = ">=2.3" },
+    { name = "pytest-xdist", specifier = ">=3.6" },
+    { name = "readme-renderer", extras = ["md"], specifier = ">=46" },
+    { name = "ruff", specifier = ">=0.17" },
+    { name = "starlette", specifier = ">=0.27" },
+    { name = "types-jsonschema", specifier = ">=4.20" },
+    { name = "uvicorn", specifier = ">=0.31.1" },
+]
+lint = [
+    { name = "readme-renderer", extras = ["md"], specifier = ">=46" },
+    { name = "ruff", specifier = ">=0.17" },
+]
+test = [
+    { name = "pytest", specifier = ">=9" },
+    { name = "pytest-cov", specifier = ">=6.0" },
+    { name = "pytest-timeout", specifier = ">=2.3" },
+    { name = "pytest-xdist", specifier = ">=3.6" },
+    { name = "starlette", specifier = ">=0.27" },
+    { name = "uvicorn", specifier = ">=0.31.1" },
+]
+typecheck = [
+    { name = "mypy", specifier = ">=2.0" },
+    { name = "types-jsonschema", specifier = ">=4.20" },
+]
+
+[[package]]
 name = "jsonschema"
 version = "4.26.0"
 source = { registry = "https://pypi.org/simple" }
@@ -793,93 +880,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/9e/2d/7c251e34207f6c51000312fc8839111ac45cfe02023f90b44e7f1051dd8e/mcp_types-2.3.0.tar.gz", hash = "sha256:d1e46549edb35ee19a94940fcee6d1addd7e589ab7ea92dda83f5d84781fc362", size = 65898, upload-time = "2026-10-02T22:06:57.863Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ce/48/32583066b155bb5d4507e7887dc88ee23118cc4de8e2a12870c49719e2a8/mcp_types-2.3.0-py3-none-any.whl", hash = "sha256:968efdbdaedfab06adae40d378a34395f1090c5921d4be3c9cde283aaf76d91d", size = 69108, upload-time = "2026-10-02T22:06:54.099Z" },
-]
-
-[[package]]
-name = "mcpcheck"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "anyio" },
-    { name = "click" },
-    { name = "httpx2" },
-    { name = "jsonschema" },
-    { name = "mcp" },
-    { name = "pydantic" },
-    { name = "rich" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "pytest-xdist" },
-    { name = "readme-renderer", extra = ["md"] },
-    { name = "ruff" },
-    { name = "starlette", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "starlette", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "types-jsonschema" },
-    { name = "uvicorn" },
-]
-lint = [
-    { name = "readme-renderer", extra = ["md"] },
-    { name = "ruff" },
-]
-test = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "pytest-xdist" },
-    { name = "starlette", version = "1.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "starlette", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "uvicorn" },
-]
-typecheck = [
-    { name = "mypy" },
-    { name = "types-jsonschema" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio", specifier = ">=4.9" },
-    { name = "click", specifier = ">=8.2" },
-    { name = "httpx2", specifier = ">=2.10" },
-    { name = "jsonschema", specifier = ">=4.20" },
-    { name = "mcp", specifier = ">=2.2,<3" },
-    { name = "pydantic", specifier = ">=2.12" },
-    { name = "rich", specifier = ">=13.9.4" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=2.0" },
-    { name = "pytest", specifier = ">=9" },
-    { name = "pytest-cov", specifier = ">=6.0" },
-    { name = "pytest-timeout", specifier = ">=2.3" },
-    { name = "pytest-xdist", specifier = ">=3.6" },
-    { name = "readme-renderer", extras = ["md"], specifier = ">=46" },
-    { name = "ruff", specifier = ">=0.17" },
-    { name = "starlette", specifier = ">=0.27" },
-    { name = "types-jsonschema", specifier = ">=4.20" },
-    { name = "uvicorn", specifier = ">=0.31.1" },
-]
-lint = [
-    { name = "readme-renderer", extras = ["md"], specifier = ">=46" },
-    { name = "ruff", specifier = ">=0.17" },
-]
-test = [
-    { name = "pytest", specifier = ">=9" },
-    { name = "pytest-cov", specifier = ">=6.0" },
-    { name = "pytest-timeout", specifier = ">=2.3" },
-    { name = "pytest-xdist", specifier = ">=3.6" },
-    { name = "starlette", specifier = ">=0.27" },
-    { name = "uvicorn", specifier = ">=0.31.1" },
-]
-typecheck = [
-    { name = "mypy", specifier = ">=2.0" },
-    { name = "types-jsonschema", specifier = ">=4.20" },
 ]
 
 [[package]]

@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mcpcheck"
+name = "jbt-mcpcheck"
 version = "0.1.0"
 description = "Validate an MCP server's conformance to the MCP 2026-07-28 revision over Streamable HTTP (read-only)."
 readme = "README.md"
@@ -49,6 +49,9 @@ Changelog = "https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md"
 
 [project.scripts]
 mcpcheck = "mcpcheck.__main__:main"
+# Alias matching the distribution name, so `uvx jbt-mcpcheck <url>` works without
+# `--from`. The command to use once installed is `mcpcheck`.
+jbt-mcpcheck = "mcpcheck.__main__:main"
 
 [dependency-groups]
 dev = [{ include-group = "test" }, { include-group = "lint" }, { include-group = "typecheck" }]
@@ -72,6 +75,11 @@ name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
+
+[tool.hatch.build.targets.wheel]
+# The distribution is `jbt-mcpcheck` but the import package is `mcpcheck`, so hatchling's
+# name-based autodetection cannot find it.
+packages = ["src/mcpcheck"]
 
 [tool.hatch.build.targets.sdist]
 exclude = ["/.github", "/.pre-commit-config.yaml", "/uv.lock", "/.python-version", "/dist", "/reports", "/htmlcov", "/.coverage*", "/.venv", "/PLAN.md"]

@@ -281,7 +281,7 @@ def _list_checks_and_exit(ctx: click.Context, _param: click.Parameter, value: bo
     None,
     "-V",
     "--version",
-    package_name="mcpcheck",
+    package_name="jbt-mcpcheck",  # distribution name, not the command
     prog_name="mcpcheck",
     message="%(prog)s %(version)s",
 )
