@@ -102,6 +102,47 @@ _SENSITIVE_NAME_RE = re.compile(r"token|secret|password", re.IGNORECASE)
 MIN_DERIVED_NEEDLE = 8
 """Encoded forms of a secret shorter than this are not scrubbed (they would match noise)."""
 JSON_TOO_DEEP = "JSON nests too deeply"
+MAX_JSON_DEPTH = 512
+"""Deepest nesting mcpcheck parses from a server.
+
+CPython's own limit is not a contract. First depth at which ``json`` raises
+``RecursionError``, measured on 2026-10-17::
+
+    3.10.20  996        3.13.5   9999
+    3.11.15  996        3.14.7   43389
+    3.12.13  9998       3.14 (GitHub runners)  > 100000
+
+3.14 derives it from the available C stack, so it varies by machine: the same
+hostile body produced ``JSON_TOO_DEEP`` locally and "JSON array (batching...)"
+on CI. A conformance tool whose verdict depends on the interpreter cannot be
+used to diff two environments, so the bound is ours.
+
+512 sits below the lowest limit above (996), which makes the ``RecursionError``
+branch unreachable and every supported Python agree, and far above anything a
+real result reaches -- a pathological 200-level tool schema nests to 405, and
+the schemas check caps schemas at ``MAX_SCHEMA_DEPTH`` (64) and reports them
+per tool rather than rejecting the whole body.
+"""
+
+_JSON_STRING_RE = re.compile(rb'"(?:[^"\\]|\\.)*"', re.DOTALL)
+_NON_BRACKET_RE = re.compile(rb"[^\[\]{}]+")
+
+
+def json_nests_too_deeply(raw: bytes, limit: int = MAX_JSON_DEPTH) -> bool:
+    """Whether ``raw`` nests deeper than ``limit``, ignoring string contents.
+
+    Both substitutions run in C, and the surviving string holds only brackets,
+    so a 16 MiB body costs two linear scans rather than a Python loop per byte.
+    """
+    depth = 0
+    for char in _NON_BRACKET_RE.sub(b"", _JSON_STRING_RE.sub(b"", raw)):
+        if char in (0x5B, 0x7B):  # [ {
+            depth += 1
+            if depth > limit:
+                return True
+        else:
+            depth -= 1
+    return False
 
 
 # --------------------------------------------------------------------------- envelope / headers
@@ -257,6 +298,8 @@ def parse_json_body(raw: bytes) -> tuple[tuple[dict[str, Any], ...], str | None]
         return (), err
     if not text.strip():
         return (), "empty body"
+    if json_nests_too_deeply(raw):
+        return (), JSON_TOO_DEEP
     try:
         value = json.loads(text)
     except json.JSONDecodeError:
@@ -379,6 +422,9 @@ def sse_messages(events: Iterable[SseEvent]) -> tuple[tuple[dict[str, Any], ...]
     error: str | None = None
     for ev in events:
         if not ev.data.strip():
+            continue
+        if json_nests_too_deeply(ev.data.encode("utf-8", "surrogatepass")):
+            error = error or f"{JSON_TOO_DEEP} in SSE data"
             continue
         try:
             value = json.loads(ev.data)

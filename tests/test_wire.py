@@ -501,6 +501,33 @@ def test_constants() -> None:
 # --------------------------------------------------------------------------- hostile bodies / redaction
 
 
+def test_json_depth_bound_is_mcpchecks_own_not_cpythons() -> None:
+    """The verdict must not depend on where CPython's parser gives up.
+
+    Regression: ``json`` raised ``RecursionError`` on a 100k-deep array under 3.13 but
+    parsed it under some 3.14 builds, so the same hostile body produced JSON_TOO_DEEP on
+    one interpreter and "JSON array (batching...)" on another -- which CI caught across
+    the matrix. These depths are well inside every CPython's limit, so only mcpcheck's
+    own bound can reject them.
+    """
+    too_deep = ("[" * (wire.MAX_JSON_DEPTH + 1) + "]" * (wire.MAX_JSON_DEPTH + 1)).encode()
+    allowed = ("[" * (wire.MAX_JSON_DEPTH - 1) + "]" * (wire.MAX_JSON_DEPTH - 1)).encode()
+    json.loads(too_deep)  # the parser itself is perfectly happy at this depth
+    assert wire.parse_json_body(too_deep) == ((), wire.JSON_TOO_DEEP)
+    assert wire.parse_json_body(allowed) == ((), "JSON array (batching is not part of 2026-07-28)")
+    assert wire.sse_messages([wire.SseEvent(data=too_deep.decode())]) == (
+        (),
+        f"{wire.JSON_TOO_DEEP} in SSE data",
+    )
+
+
+def test_brackets_inside_strings_do_not_count_toward_depth() -> None:
+    body = b'{"jsonrpc":"2.0","id":1,"result":{"text":"' + b"[" * 10_000 + b'"}}'
+    messages, error = wire.parse_json_body(body)
+    assert error is None
+    assert messages[0]["result"]["text"].startswith("[[[")
+
+
 def test_deeply_nested_json_is_a_parse_error_not_a_crash() -> None:
     deep = "[" * 100_000 + "]" * 100_000
     assert wire.parse_json_body(deep.encode()) == ((), wire.JSON_TOO_DEEP)

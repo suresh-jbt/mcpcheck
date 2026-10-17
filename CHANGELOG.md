@@ -13,6 +13,12 @@ is listed under *Changed* or *Removed*.
 
 ### Fixed
 
+- A deeply nested JSON body now gets the same verdict on every Python. The parse
+  previously relied on CPython raising `RecursionError`, whose threshold moved
+  from 996 (3.10/3.11) to ~10000 (3.12/3.13) to a stack-dependent value in 3.14,
+  so the same hostile response was reported as "JSON nests too deeply" on one
+  interpreter and "JSON array" on another. mcpcheck now applies its own bound
+  (`wire.MAX_JSON_DEPTH`, 512), which no real result approaches.
 - The progress spinner is no longer animated into a redirected stderr. It was
   gated on rich's `is_terminal`, which is true whenever `FORCE_COLOR` is set --
   as GitHub Actions and many CI runners do -- so `mcpcheck ... 2> log` wrote
