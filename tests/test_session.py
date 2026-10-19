@@ -497,7 +497,9 @@ async def test_fail_bogus_rejected_only() -> None:
     server = conformant_server()
     server.routes["tools/list"] = tools_route
     result = await run_scripted(server)
-    assert result.status is Status.FAIL
+    # SHOULD, not MUST: only a server that supports *only* 2026-07-28 is asked to ignore
+    # an id it never issued, and the revision has no MUST about sessions at all.
+    assert result.status is Status.WARN
     assert codes(result) == {"session.bogus_id_rejected"}
     assert (
         result.summary
@@ -515,7 +517,7 @@ async def test_bogus_rejected_for_any_reason_when_plain_request_succeeded() -> N
     server = conformant_server()
     server.routes["tools/list"] = tools_route
     result = await run_scripted(server)
-    assert result.status is Status.FAIL
+    assert result.status is Status.WARN
     assert codes(result) == {"session.bogus_id_rejected"}
     assert result.summary == "Server enforces `Mcp-Session-Id` (bogus id → HTTP 500)"
 
@@ -1022,14 +1024,14 @@ async def test_pass_misbehaving_baseline(toggles: Toggles) -> None:
         (
             Toggles(require_session_id=True),
             Status.FAIL,
-            {"session.required", "session.bogus_id_rejected"},
-            Level.MUST,
+            {"session.required"},
+            Level.MUST,  # session.required is the MUST; bogus_id_rejected is a SHOULD alongside
         ),
         (
             Toggles(require_initialize=True),
             Status.FAIL,
-            {"session.required", "session.bogus_id_rejected"},
-            Level.MUST,
+            {"session.required"},
+            Level.MUST,  # ditto
         ),
         (Toggles(mint_session_id=True), Status.WARN, {"session.session_id_minted"}, Level.SHOULD),
         (Toggles(echo_session_id=True), Status.WARN, {"session.session_id_echoed"}, Level.SHOULD),
@@ -1083,6 +1085,24 @@ async def test_misbehaving_toggle_rows(
     assert expected <= codes(result), codes(result)
     for code in expected:
         assert finding(result, code).level is level
+
+
+@pytest.mark.parametrize(
+    "toggles",
+    [Toggles(require_session_id=True), Toggles(require_initialize=True)],
+    ids=["require_session_id", "require_initialize"],
+)
+async def test_session_enforcement_is_must_but_bogus_id_is_should(toggles: Toggles) -> None:
+    """Requiring a session is the MUST; rejecting an id it never issued is only a SHOULD.
+
+    2026-07-28 asks a server that supports *only* this revision to ignore an unknown
+    Mcp-Session-Id (transports#earlier-streamable-http-revisions). That is a SHOULD, and
+    the revision carries no MUST about sessions at all -- emitting it at MUST level
+    failed the official reference server for behaviour 2025-11-25 requires of it.
+    """
+    result, _ = await run_asgi(misbehaving_server.build_app(toggles), lifespan=False)
+    assert finding(result, "session.required").level is Level.MUST
+    assert finding(result, "session.bogus_id_rejected").level is Level.SHOULD
 
 
 async def test_misbehaving_require_initialize_fingerprint() -> None:

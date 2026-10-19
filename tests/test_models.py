@@ -136,6 +136,20 @@ def test_aggregate_exit_code_precedence() -> None:
     assert aggregate_exit_code([], strict=True) == 0
 
 
+def test_a_run_that_judged_nothing_exits_2() -> None:
+    """Every check inconclusive means nothing was verified: "could not run".
+
+    Regression: this exited 0, so `mcpcheck "$URL" && deploy` went green against a URL
+    that was not an MCP server at all (a plain web server answering 501, a gateway
+    answering 403 — both seen in the wild).
+    """
+    for strict in (False, True):
+        assert aggregate_exit_code([Status.INCONCLUSIVE] * 8, strict=strict) == 2
+    # a single inconclusive check alongside real verdicts is still not a failure
+    assert aggregate_exit_code([Status.PASS, Status.INCONCLUSIVE], strict=False) == 0
+    assert aggregate_exit_code([Status.FAIL, Status.INCONCLUSIVE], strict=False) == 1
+
+
 def test_enums_are_str_enums_not_strenum() -> None:
     assert isinstance(Status.PASS, str)
     assert Status("pass") is Status.PASS

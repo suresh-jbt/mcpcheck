@@ -492,6 +492,62 @@ async def test_fail_legacy_stateful_1x_shape(sse: bool) -> None:
     assert server.methods() == ["tools/list"]  # no initialize without --legacy-probes
 
 
+async def test_rejected_version_is_not_reported_as_supported() -> None:
+    """The TypeScript SDK names the version it refused first; it is not a supported one.
+
+    Regression: scanning the whole message for YYYY-MM-DD tokens reported
+    server_supported_versions = ['2026-07-28', ...] for a server that had just said it
+    does not support 2026-07-28 -- the report contradicted itself.
+    """
+    message = (
+        "Bad Request: Unsupported protocol version: 2026-07-28 "
+        "(supported versions: 2025-11-25, 2025-06-18, 2025-03-26, 2024-11-05)"
+    )
+    server = ScriptedServer(
+        routes={"tools/list": lambda b, _r: error_response(b, -32000, message, status=400)}
+    )
+    run = await run_scripted(server)
+    assert run.ctx.server_supported_versions == [
+        "2025-11-25",
+        "2025-06-18",
+        "2025-03-26",
+        "2024-11-05",
+    ]
+    assert wire.PROTOCOL_VERSION not in (run.ctx.server_supported_versions or [])
+    assert "does not speak 2026-07-28" in run.result.summary
+    assert run.codes == {"handshake.version_unsupported_legacy"}
+    assert run.blocked
+
+
+async def test_python_1x_version_rejection_is_not_mistaken_for_a_session_error() -> None:
+    """Python mcp 1.x answers a version rejection with id "server-error".
+
+    Regression: the id sentinel was tested before the message, so every 1.x server was
+    labelled legacy_session and the version list it volunteered was thrown away.
+    """
+    message = (
+        "Bad Request: Unsupported protocol version: 2026-07-28. "
+        "Supported versions: 2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25"
+    )
+    server = ScriptedServer(
+        routes={
+            "tools/list": lambda b, _r: error_response(
+                b, -32600, message, status=400, request_id="server-error"
+            )
+        }
+    )
+    run = await run_scripted(server)
+    finding = run.finding("handshake.version_unsupported_legacy")
+    assert finding.evidence is not None
+    assert finding.evidence["fingerprint"] == "legacy_version_reject"
+    assert run.ctx.server_supported_versions == [
+        "2024-11-05",
+        "2025-03-26",
+        "2025-06-18",
+        "2025-11-25",
+    ]
+
+
 async def test_fail_legacy_version_reject_parses_versions_from_message() -> None:
     message = (
         "Bad Request: Unsupported protocol version (supported versions: "
@@ -502,7 +558,7 @@ async def test_fail_legacy_version_reject_parses_versions_from_message() -> None
     )
     run = await run_scripted(server)
     assert run.result.status is Status.FAIL
-    finding = run.finding("handshake.initialize_required")
+    finding = run.finding("handshake.version_unsupported_legacy")
     assert finding.evidence is not None
     assert finding.evidence["fingerprint"] == "legacy_version_reject"
     assert finding.evidence["supported_versions_source"] == "message"
@@ -1414,14 +1470,18 @@ async def test_mint_session_id_is_not_a_handshake_finding() -> None:
         ("error-32602", Status.FAIL, {"handshake.initialize_required"}),
         ("error-32042", Status.FAIL, {"handshake.initialize_required"}),
         ("error-32000", Status.FAIL, {"handshake.initialize_required"}),
-        ("legacy-version-reject", Status.FAIL, {"handshake.initialize_required"}),
+        ("legacy-version-reject", Status.FAIL, {"handshake.version_unsupported_legacy"}),
     ],
 )
 async def test_wire_variants(variant: str, status: Status, codes: set[str]) -> None:
     run = await run_misbehaving(Toggles(discover_variant=variant))
     assert run.result.status is status, run.result
     assert run.codes == codes
-    era_fail = codes & {"handshake.initialize_required", "handshake.version_unsupported"}
+    era_fail = codes & {
+        "handshake.initialize_required",
+        "handshake.version_unsupported",
+        "handshake.version_unsupported_legacy",
+    }
     assert run.blocked is (bool(era_fail) or codes == {"handshake.not_jsonrpc"})
     if variant == "legacy-version-reject":
         assert run.ctx.server_supported_versions == [
@@ -1551,7 +1611,7 @@ async def test_tcp_require_initialize_gates_dependents(
     assert dependent.info[0].code == "runner.not_run"
     assert dependent.summary == f"Not run: {handshake.summary}"
     assert report.era is Era.LEGACY_ONLY
-    assert report.summary.exit_code == 1
+    assert report.summary.exit_code == 1  # the handshake FAILED; that is a verdict, not silence
     assert verbs_and_methods(fetch_request_log(url)) == [("POST", "tools/list")]
 
 
@@ -1600,7 +1660,7 @@ async def test_tcp_timeout_budget(misbehaving_url: Callable[[Toggles], str]) -> 
     assert handshake.summary == "Not evaluated: request exceeded the 1s total budget"
     assert dependent.status is Status.INCONCLUSIVE
     assert elapsed < 3.0
-    assert report.summary.exit_code == 0
+    assert report.summary.exit_code == 2  # nothing could be judged
 
 
 @pytest.mark.integration
@@ -1654,10 +1714,10 @@ async def test_tcp_connect_refused_is_error_exit_2() -> None:
 async def test_tcp_strict_exit_codes(misbehaving_url: Callable[[Toggles], str]) -> None:
     url = misbehaving_url(Toggles(status=401))
     report = await run_tcp(url)
-    assert report.summary.exit_code == 0
+    assert report.summary.exit_code == 2  # every check inconclusive: nothing was verified
     assert "--token" in report.checks[0].summary
     report = await run_tcp(url, strict=True)
-    assert report.summary.exit_code == 1
+    assert report.summary.exit_code == 2  # already 2 without --strict: nothing was verified
 
 
 # --------------------------------------------------------------------------- -32021 shape MUSTs (B:389-394)

@@ -220,7 +220,18 @@ def exit_code_for(status: Status, *, strict: bool) -> int:
 
 
 def aggregate_exit_code(statuses: list[Status], *, strict: bool) -> Literal[0, 1, 2]:
-    """``max`` over the selected checks (2 > 1 > 0); an empty run exits 0."""
+    """``max`` over the selected checks (2 > 1 > 0); an empty run exits 0.
+
+    A run in which *nothing* could be judged exits 2 even without ``--strict``. An
+    inconclusive check on its own is not a failure -- 401 on one check while the rest
+    pass is a useful 0 -- but when every selected check is inconclusive, mcpcheck
+    verified nothing at all, which is what exit 2 means ("could not run"). Without
+    this, pointing the tool at a URL that is not an MCP server at all (a plain web
+    server answering 501, a gateway answering 403) exited 0, so `mcpcheck "$URL" &&
+    deploy` went green having tested nothing.
+    """
+    if statuses and all(s is Status.INCONCLUSIVE for s in statuses):
+        return 2
     code = max((exit_code_for(s, strict=strict) for s in statuses), default=0)
     if code == 0:
         return 0

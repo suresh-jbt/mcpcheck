@@ -10,7 +10,7 @@
 # Needs nothing but `uv` inside a clone of https://github.com/suresh-jbt/mcpcheck.
 # Override the command under test with MCPCHECK, e.g.
 #   MCPCHECK=mcpcheck bash examples/demo.sh                  # an mcpcheck on PATH
-#   MCPCHECK="uvx jbt-mcpcheck@0.1.0" bash examples/demo.sh      # a pinned release
+#   MCPCHECK="uvx jbt-mcpcheck@0.1.1" bash examples/demo.sh      # a pinned release
 set -euo pipefail
 
 BREAKS="cache,origin,output-schema"

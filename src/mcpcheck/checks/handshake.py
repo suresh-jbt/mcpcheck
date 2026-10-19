@@ -50,6 +50,7 @@ HINT_INTERMEDIARY = (
     "an intermediary may be stripping or rewriting headers"
 )
 _DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_SUPPORTED_RE = re.compile(r"supported\s+versions?\s*:?", re.IGNORECASE)
 # 4xx statuses without a JSON-RPC body that are infrastructure, never an era signal
 _INFRA_4XX = frozenset({401, 402, 403, 407, 408, 413, 414, 415, 429, 431, 451})
 
@@ -92,6 +93,13 @@ def _fingerprint(reply: RawReply, outcome: Outcome) -> str:
         return "empty_400" if not reply.raw.strip() else "non_modern_error"
     msg = outcome.rpc_message.lower()
     resp = reply.any_response or {}
+    # What the message *says* beats the id sentinel. Python mcp 1.x answers a version
+    # rejection with id "server-error", so testing the sentinel first labelled the whole
+    # 1.x ecosystem "legacy_session" and threw away the version list it had just named.
+    if "unsupported protocol version" in msg:
+        return "legacy_version_reject"
+    if "not initialized" in msg or "before initialization" in msg:
+        return "not_initialized"
     if (
         resp.get("id") == "server-error"
         or "missing session id" in msg
@@ -99,10 +107,6 @@ def _fingerprint(reply: RawReply, outcome: Outcome) -> str:
         or "invalid session" in msg
     ):
         return "legacy_session"
-    if "unsupported protocol version" in msg:
-        return "legacy_version_reject"
-    if "not initialized" in msg or "before initialization" in msg:
-        return "not_initialized"
     return "non_modern_error"
 
 
@@ -131,6 +135,19 @@ def _versions_in(text: str) -> list[str]:
         if m not in seen:
             seen.append(m)
     return seen
+
+
+def _supported_versions_in(text: str) -> list[str]:
+    """The versions a rejection message says the server *does* support.
+
+    "Unsupported protocol version: 2026-07-28 (supported versions: 2025-11-25, ...)"
+    names the rejected version first, so scanning the whole message reported the one
+    version the server had just refused as supported. Prefer the list after "supported
+    versions", and never include the version mcpcheck proposed.
+    """
+    match = _SUPPORTED_RE.search(text)
+    scope = text[match.end() :] if match else text
+    return [v for v in _versions_in(scope) if v != wire.PROTOCOL_VERSION]
 
 
 def _error_text(reply: RawReply) -> str:
@@ -629,7 +646,7 @@ class HandshakeCheck(Check):
             return _Verdict()
         fingerprint = _fingerprint(reply, outcome)
         if fingerprint == "legacy_version_reject":
-            named = _versions_in(outcome.rpc_message)
+            named = _supported_versions_in(outcome.rpc_message)
             if named:
                 ctx.server_supported_versions = named
         if outcome.rpc_code is not None:
@@ -649,6 +666,21 @@ class HandshakeCheck(Check):
         if fingerprint == "legacy_version_reject" and ctx.server_supported_versions:
             ev["supported_versions_source"] = "message"
             ev["supported"] = ctx.server_supported_versions
+        if fingerprint == "legacy_version_reject":
+            # Saying "requires initialize" here was simply false: these servers serve
+            # tools/list happily without one, they just do not speak 2026-07-28. Name the
+            # versions they do speak -- that is the one fact the operator needs.
+            speaks: list[str] = list(ctx.server_supported_versions or ())
+            suffix = f" (speaks {', '.join(speaks)})" if speaks else ""
+            f.must(
+                "handshake.version_unsupported_legacy",
+                "Server does not support 2026-07-28: it rejected a complete request for this "
+                "revision" + (f" and names {', '.join(speaks)} instead" if speaks else ""),
+                subject=subject,
+                spec_url=spec_urls.SPEC_BACKCOMPAT_HTTP,
+                evidence=ev,
+            )
+            return _Verdict(modern=False, summary=f"Server does not speak 2026-07-28{suffix}")
         f.must(
             "handshake.initialize_required",
             "Server rejected a complete 2026-07-28 request with a non-modern error; "

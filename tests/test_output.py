@@ -15,7 +15,7 @@ import httpx2
 import pytest
 from rich.console import Console
 
-from mcpcheck import output
+from mcpcheck import __version__, output
 from mcpcheck.client import Exchange
 from mcpcheck.models import CheckName, Status
 from tests.helpers.reports import fake_report
@@ -88,7 +88,7 @@ def test_json_golden() -> None:
 
 def test_layout_rows_and_header() -> None:
     lines = render_human("mixed").splitlines()
-    assert lines[0] == "mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp"
+    assert lines[0] == f"mcpcheck {__version__} · MCP 2026-07-28 · https://api.example.com/mcp"
     assert lines[1] == "server: (no serverInfo) · speaks 2026-07-28 · 8 checks"
     assert lines[2] == ""
     assert lines[3] == "✓ handshake     Server does not require `initialize`"
@@ -126,7 +126,7 @@ def test_ascii_fallback_glyphs() -> None:
     assert "·" not in text
     assert "+ handshake     " in text
     assert "x schemas       " in text
-    assert "mcpcheck 0.1.0 | MCP 2026-07-28 | https://api.example.com/mcp" in text
+    assert f"mcpcheck {__version__} | MCP 2026-07-28 | https://api.example.com/mcp" in text
 
 
 def test_final_line_templates() -> None:

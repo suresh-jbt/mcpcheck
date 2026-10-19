@@ -1,4 +1,4 @@
-mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
+mcpcheck 0.1.1 · MCP 2026-07-28 · https://api.example.com/mcp
 server: unreachable — cannot connect to https://api.example.com/mcp: ConnectError: All connection attempts failed
 
 E handshake     Error: cannot connect to https://api.example.com/mcp: ConnectError: All connection attempts failed

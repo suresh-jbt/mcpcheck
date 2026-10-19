@@ -12,7 +12,7 @@ Check that an MCP server conforms to the **2026-07-28** revision of the [Model C
 
 ```console
 $ mcpcheck https://api.example.com/mcp
-mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
+mcpcheck 0.1.1 · MCP 2026-07-28 · https://api.example.com/mcp
 server: mcpcheck-misbehaving-server 0.1.0 · speaks 2026-07-28 · 8 checks
 
 ✓ handshake     Server does not require `initialize`
@@ -58,7 +58,7 @@ It takes about three seconds and needs nothing but [uv](https://docs.astral.sh/u
 demo server listening on http://127.0.0.1:60754/mcp (breaks: none)
 $ uv run --quiet mcpcheck http://127.0.0.1:60754/mcp
 
-mcpcheck 0.1.0 · MCP 2026-07-28 · http://127.0.0.1:60754/mcp
+mcpcheck 0.1.1 · MCP 2026-07-28 · http://127.0.0.1:60754/mcp
 server: mcpcheck-demo-support-desk 1.0.0 · speaks 2026-07-28 · 8 checks
 
 ✓ handshake     Server does not require `initialize`
@@ -116,7 +116,7 @@ The package is published as **`jbt-mcpcheck`** because PyPI considers `mcpcheck`
 similar to an unrelated project named `mcp-check`. Installing it gives you the
 **`mcpcheck`** command, which is what every example below uses.
 
-Requires Python 3.10 or newer (3.10 support ends at 1.0 or when the `mcp` SDK drops it, whichever comes first) and is built on the official [`mcp`](https://pypi.org/project/mcp/) Python SDK (2.x). Pin a version in CI with `uvx jbt-mcpcheck@0.1.0`.
+Requires Python 3.10 or newer (3.10 support ends at 1.0 or when the `mcp` SDK drops it, whichever comes first) and is built on the official [`mcp`](https://pypi.org/project/mcp/) Python SDK (2.x). Pin a version in CI with `uvx jbt-mcpcheck@0.1.1`.
 
 To work on `mcpcheck` itself, clone it instead and prefix the commands with `uv run` — which is what [Try it](#try-it) above does:
 
@@ -164,7 +164,7 @@ uv run mcpcheck http://127.0.0.1:8000/mcp
 Three deliberate flaws in the demo server, and the report that results — two MUST failures and one best-practice warning:
 
 ```console
-mcpcheck 0.1.0 · MCP 2026-07-28 · http://127.0.0.1:8000/mcp
+mcpcheck 0.1.1 · MCP 2026-07-28 · http://127.0.0.1:8000/mcp
 server: mcpcheck-demo-support-desk 1.0.0 · speaks 2026-07-28 · 8 checks
 
 ✓ handshake     Server does not require `initialize`
@@ -204,7 +204,7 @@ mcpcheck https://api.example.com/mcp
 
 ```console
 $ mcpcheck https://api.example.com/mcp
-mcpcheck 0.1.0 · MCP 2026-07-28 · https://api.example.com/mcp
+mcpcheck 0.1.1 · MCP 2026-07-28 · https://api.example.com/mcp
 server: (no serverInfo) · protocol version unknown · 8 checks
 
 ? handshake     Not evaluated: HTTP 401 (pass --token)
@@ -213,7 +213,7 @@ server: (no serverInfo) · protocol version unknown · 8 checks
 No conclusive checks: 8 inconclusive in 0.0s.
 ```
 
-That run still exits `0`, because nothing was disproved. Add `--strict` if "could not judge" should fail your pipeline.
+That run exits `2`: not one check reached a verdict, so `mcpcheck` verified nothing about the server — the same code it uses for "could not run". A pipeline written as `mcpcheck "$URL" && deploy` therefore stops, instead of going green against a server it never managed to inspect. An inconclusive check *alongside* conclusive ones is still fine; use `--strict` if even that should fail the build.
 
 ### A server that only answers an allow-listed Origin
 
@@ -234,7 +234,7 @@ A focused run is the fastest feedback loop there is: it prints nothing but the c
 
 ```console
 $ mcpcheck http://127.0.0.1:8000/mcp --check cache
-mcpcheck 0.1.0 · MCP 2026-07-28 · http://127.0.0.1:8000/mcp
+mcpcheck 0.1.1 · MCP 2026-07-28 · http://127.0.0.1:8000/mcp
 server: mcpcheck-demo-support-desk 1.0.0 · speaks 2026-07-28 · 1 check
 
 ✗ cache         8 cache-hint violations: tools/list ttlMs missing; tools/list cacheScope missing (+6 more)
@@ -354,7 +354,7 @@ repos:
         name: mcpcheck (MCP 2026-07-28 conformance)
         entry: mcpcheck http://127.0.0.1:8000/mcp
         language: python
-        additional_dependencies: [mcpcheck==0.1.0]
+        additional_dependencies: [jbt-mcpcheck==0.1.1]
         pass_filenames: false
         stages: [pre-push]
 ```
@@ -364,7 +364,7 @@ If no server is running locally, keep the check in CI instead, where the job can
 ### Pin the version in CI
 
 ```shell
-uvx jbt-mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
+uvx jbt-mcpcheck@0.1.1 http://127.0.0.1:8000/mcp --output mcpcheck.json
 ```
 
 New checks and new findings arrive in minor releases, so an unpinned `mcpcheck` can start failing a pull request that did not touch the server. Pin it, read the [changelog](https://github.com/suresh-jbt/mcpcheck/blob/main/CHANGELOG.md) when you bump it, and keep the report as a build artifact: it records `mcpcheck_version`, `sdk_version` and `spec_revision`, so an old verdict stays explainable.
@@ -382,10 +382,10 @@ mcpcheck http://127.0.0.1:8000/mcp --check origin -vv 2>&1 >/dev/null | head -20
 > 1 POST http://127.0.0.1:8000/mcp  tools/list
 >   accept: application/json, text/event-stream
 >   content-type: application/json
->   user-agent: mcpcheck/0.1.0 (+https://github.com/suresh-jbt/mcpcheck)
+>   user-agent: mcpcheck/0.1.1 (+https://github.com/suresh-jbt/mcpcheck)
 >   mcp-protocol-version: 2026-07-28
 >   mcp-method: tools/list
->   {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/clientInfo":{"name":"mcpcheck","version":"0.1.0"}}}}
+>   {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/clientInfo":{"name":"mcpcheck","version":"0.1.1"}}}}
 < 1 200 application/json 1ms
 …
 # check: origin  conn=origin-evil
@@ -590,7 +590,7 @@ With `--json`, or `--output FILE` (which keeps the human report on stdout), you 
 {
   "$schema": "https://raw.githubusercontent.com/suresh-jbt/mcpcheck/main/schema/mcpcheck-report.v1.schema.json",
   "schema_version": 1,
-  "mcpcheck_version": "0.1.0",
+  "mcpcheck_version": "0.1.1",
   "sdk_version": "2.3.0",
   "python_version": "3.13.5",
   "spec_revision": "2026-07-28",
@@ -688,9 +688,9 @@ Finding `code`s (`cache.ttl_missing`, `schemas.input_schema_invalid`, `origin.ev
 
 | Code | Meaning |
 |:----:|---------|
-| `0` | Every selected check passed. Warnings and inconclusive checks (nothing could be judged, e.g. HTTP 401 without `--token`) are allowed unless `--strict` |
+| `0` | Every selected check passed. Warnings, and inconclusive checks *alongside* conclusive ones, are allowed unless `--strict` |
 | `1` | At least one selected check failed (a MUST was violated). With `--strict`, a warning or an inconclusive check also produces `1` |
-| `2` | `mcpcheck` could not run: bad arguments, connection refused or timed out, TLS failure, an incompatible `mcp` SDK, or an internal error |
+| `2` | `mcpcheck` could not run: bad arguments, connection refused or timed out, TLS failure, an incompatible `mcp` SDK, an internal error — **or every selected check was inconclusive**, so nothing was verified (e.g. HTTP 401 without `--token`, or a URL that is not an MCP endpoint) |
 | `130` | Interrupted (SIGINT) |
 
 A JSON-RPC error that *is* a server answer (`-32601`, `-32602`, `-32020`, `-32022`, ...) is check data, never exit `2`. When `--output FILE` is given the JSON report is written even on exit `1` or `2`.
@@ -715,7 +715,7 @@ jobs:
       - name: Check conformance with MCP 2026-07-28
         env:
           MCPCHECK_TOKEN: ${{ secrets.MCP_TEST_TOKEN }}   # omit for unauthenticated servers
-        run: uvx jbt-mcpcheck@0.1.0 http://127.0.0.1:8000/mcp --output mcpcheck.json
+        run: uvx jbt-mcpcheck@0.1.1 http://127.0.0.1:8000/mcp --output mcpcheck.json
       - uses: actions/upload-artifact@v7
         if: always()
         with: {name: mcpcheck-report, path: mcpcheck.json}

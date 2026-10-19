@@ -840,7 +840,8 @@ async def test_env_401_every_check_inconclusive(strict: bool) -> None:
         report = await run_all(server.url, strict=strict)
     assert all(r.status is Status.INCONCLUSIVE for r in report.checks)
     assert "--token" in result_of(report, "handshake").summary
-    assert report.summary.exit_code == (1 if strict else 0)
+    # Every check inconclusive means nothing was verified: exit 2 either way.
+    assert report.summary.exit_code == 2
     assert report.summary.inconclusive == len(NAMES)
 
 
@@ -893,7 +894,7 @@ async def test_env_slow_server_inconclusive_quickly() -> None:
     assert result_of(report, "handshake").status is Status.INCONCLUSIVE
     assert all(r.status is Status.INCONCLUSIVE for r in report.checks)
     assert elapsed < 2.0, elapsed
-    assert report.summary.exit_code == 0
+    assert report.summary.exit_code == 2  # nothing could be judged
 
 
 def test_no_fixture_thread_survives_a_stopped_server() -> None:
@@ -1061,11 +1062,11 @@ def test_cli_missing_token_is_inconclusive_and_hints(
 ) -> None:
     url = reference_url_factory(require_token=TOKEN)
     proc = cli(url)
-    assert proc.returncode == 0, proc.stdout
+    assert proc.returncode == 2, proc.stdout  # could not run: every check inconclusive
     assert "--token" in proc.stdout
     assert "HTTP 401" in proc.stdout
     strict = cli(url, "--strict")
-    assert strict.returncode == 1
+    assert strict.returncode == 2  # all inconclusive, strict or not
 
 
 # --------------------------------------------------------------------------- fix-pass regressions

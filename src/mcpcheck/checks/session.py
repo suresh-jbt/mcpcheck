@@ -31,7 +31,7 @@ from mcpcheck.checks.base import (
     items_of,
     walk_budget_reason,
 )
-from mcpcheck.models import Status
+from mcpcheck.models import Era, Status
 from mcpcheck.wire import Outcome, OutcomeKind, classify_reply
 
 if TYPE_CHECKING:
@@ -338,7 +338,7 @@ class SessionCheck(Check):
             st.inconclusive = _not_evaluated(first)
         if required and first is not None:
             self._report_required(f, st, first)
-        self._judge_bogus(f, st, required=required)
+        self._judge_bogus(ctx, f, st, required=required)
         if not required and st.inconclusive is None:
             await self._judge_samples(ctx, f, st)
         self._judge_session_ids(ctx, f, st)
@@ -493,7 +493,7 @@ class SessionCheck(Check):
             message,
         )
 
-    def _judge_bogus(self, f: Findings, st: _State, *, required: bool) -> None:
+    def _judge_bogus(self, ctx: CheckContext, f: Findings, st: _State, *, required: bool) -> None:
         bogus = st.bogus
         if bogus is None:
             return
@@ -509,12 +509,26 @@ class SessionCheck(Check):
         if not (sample1_ok or _looks_session_required(bogus)):
             return  # the plain request failed for the same infrastructure reason
         code, message = _rpc_of(reply)
-        f.must(
-            "session.bogus_id_rejected",
+        # 2026-07-28 asks for this only of servers that speak *nothing else*: "A server
+        # that supports only this revision ... SHOULD ... ignore [an Mcp-Session-Id]"
+        # (transports#earlier-streamable-http-revisions). There is no MUST about sessions
+        # anywhere in the revision, and a dual-era server is obeying 2025-11-25, which
+        # requires exactly this 404 -- so failing it would be wrong twice over.
+        dual_era = ctx.era is Era.DUAL_ERA
+        report = f.info if dual_era else f.should
+        why = (
+            "the server also serves pre-2026 clients, and 2025-11-25 requires it to reject "
+            "an id it never issued; noted only because a 2026-07-28-only server SHOULD "
+            "ignore the header instead"
+            if dual_era
+            else "a server that supports only 2026-07-28 SHOULD ignore an id it never issued"
+        )
+        report(
+            "session.bogus_id_rejected_dual_era" if dual_era else "session.bogus_id_rejected",
             f"tools/list with an unknown Mcp-Session-Id was rejected with HTTP {reply.status}"
-            f"{_rpc_text(code, message)}; an id the server never issued MUST be ignored",
+            f"{_rpc_text(code, message)}; {why}",
             subject="Mcp-Session-Id",
-            spec_url=spec_urls.SPEC_STATELESSNESS,
+            spec_url=spec_urls.SPEC_EARLIER_REVISIONS,
             evidence={
                 "connection": "bogus",
                 "method": TOOLS,
@@ -526,7 +540,7 @@ class SessionCheck(Check):
             },
         )
         st.note(
-            "session.bogus_id_rejected",
+            "session.bogus_id_rejected_dual_era" if dual_era else "session.bogus_id_rejected",
             f"Server enforces `Mcp-Session-Id` (bogus id → HTTP {reply.status}"
             + (' "{msg}")' if message else ")"),
             message,

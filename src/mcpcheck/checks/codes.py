@@ -140,6 +140,12 @@ FINDING_CODES: dict[str, CodeInfo] = dict(
             su.SPEC_META,
         ),
         _c(
+            "handshake.version_unsupported_legacy",
+            "must",
+            "Server rejected 2026-07-28 and named the earlier revisions it speaks",
+            su.SPEC_BACKCOMPAT_HTTP,
+        ),
+        _c(
             "handshake.initialize_required",
             "must",
             "Server requires the legacy initialize handshake",
@@ -190,9 +196,15 @@ FINDING_CODES: dict[str, CodeInfo] = dict(
         ),
         _c(
             "session.bogus_id_rejected",
-            "must",
+            "should",
             "Bogus Mcp-Session-Id rejected while plain request succeeded",
-            su.SPEC_STATELESSNESS,
+            su.SPEC_EARLIER_REVISIONS,
+        ),
+        _c(
+            "session.bogus_id_rejected_dual_era",
+            "info",
+            "Bogus Mcp-Session-Id rejected by a server that also serves pre-2026 clients",
+            su.SPEC_EARLIER_REVISIONS,
         ),
         _c(
             "session.list_varies_per_connection",

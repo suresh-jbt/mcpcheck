@@ -77,6 +77,10 @@ def jsonrpc_error(
     return {"jsonrpc": "2.0", "id": req_id, "error": err}
 
 
+_ECHO = object()
+"""Sentinel: echo the request's own id (what a conformant server does)."""
+
+
 def error_response(
     body: dict[str, Any],
     code: int,
@@ -86,10 +90,16 @@ def error_response(
     data: Any = None,
     sse: bool = False,
     null_id: bool = False,
+    request_id: Any = _ECHO,
     headers: dict[str, str] | None = None,
 ) -> httpx2.Response:
-    """An HTTP ``status`` carrying a JSON-RPC error for ``body``."""
-    msg = jsonrpc_error(None if null_id else body.get("id"), code, message, data)
+    """An HTTP ``status`` carrying a JSON-RPC error for ``body``.
+
+    ``request_id`` overrides the echoed id, which real servers do: Python mcp 1.x
+    answers a rejected request with the sentinel ``"server-error"``.
+    """
+    echoed = body.get("id") if request_id is _ECHO else request_id
+    msg = jsonrpc_error(None if null_id else echoed, code, message, data)
     if sse:
         return httpx2.Response(
             status,

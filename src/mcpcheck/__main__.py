@@ -313,7 +313,8 @@ def main(
     with deliberately invalid arguments to annotated read-only tools, header probes
     that cannot execute anything, and one OPTIONS request. Exit status is 0 when
     every selected check passes, 1 when a check fails, and 2 when mcpcheck could
-    not run (usage error, network failure, crash).
+    not run: a usage error, a network failure, a crash, or a run in which every
+    check was inconclusive, so nothing about the server was verified.
     """
     try:
         _main(

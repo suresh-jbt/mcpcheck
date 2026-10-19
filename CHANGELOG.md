@@ -11,6 +11,44 @@ is listed under *Changed* or *Removed*.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-19
+
+Found by running 0.1.0 against 33 real MCP servers — the official conformance
+suite's TypeScript examples, the Python SDK's own examples, real `mcp` 1.x and
+TypeScript SDK 1.x servers, and third-party community servers. Every defect
+below was invisible to the in-repo fixtures, which turned out to encode a
+politer server than either real SDK.
+
+### Fixed
+
+- `session.bogus_id_rejected` is a **should**, not a **must**, and is demoted to
+  an informational note on a dual-era server. The only clause on point asks "a
+  server that supports **only** this revision" to ignore an unknown
+  `Mcp-Session-Id` — a SHOULD — and the revision carries no MUST about sessions
+  at all. At must level it failed `@modelcontextprotocol/server-everything`, the
+  official reference server, for behaviour that 2025-11-25 positively requires of
+  it, in a run that simultaneously reported `era: dual-era`.
+- `server_supported_versions` no longer contains the version the server just
+  rejected. Rejection messages name the refused version first ("Unsupported
+  protocol version: 2026-07-28 (supported versions: 2025-11-25, …)"), and the
+  scan took every date in the prose, so the report contradicted itself.
+- A version rejection is no longer mistaken for a session error. Python `mcp` 1.x
+  answers one with the id sentinel `"server-error"`, which was tested before the
+  message, so the whole 1.x ecosystem was labelled `legacy_session` and the
+  version list it had just volunteered was discarded.
+- A server that simply does not speak 2026-07-28 is no longer reported as
+  requiring `initialize` — these servers serve `tools/list` happily without one.
+  The new `handshake.version_unsupported_legacy` names the revisions the server
+  does speak and cites backward-compatibility instead of statelessness.
+
+### Changed
+
+- **A run in which every check is inconclusive now exits `2`, not `0`.** Nothing
+  was verified, which is what exit 2 means. Previously `mcpcheck "$URL" && deploy`
+  went green against a URL that was not an MCP server at all — a plain web server
+  answering 501, or a gateway answering 403. An inconclusive check *alongside*
+  conclusive ones is unchanged: still exit 0 without `--strict`.
+
 ## [0.1.0] - 2026-10-17
 
 ### Added
@@ -186,5 +224,6 @@ is listed under *Changed* or *Removed*.
   line/paragraph separators and the BOM in server-controlled text (Trojan-Source
   style reordering), in addition to C0/C1 controls.
 
-[Unreleased]: https://github.com/suresh-jbt/mcpcheck/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/suresh-jbt/mcpcheck/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/suresh-jbt/mcpcheck/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/suresh-jbt/mcpcheck/releases/tag/v0.1.0

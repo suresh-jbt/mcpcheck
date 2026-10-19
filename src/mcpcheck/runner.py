@@ -37,7 +37,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 
 # handshake failure codes that mean "wrong era" (dependents cannot be judged)
-_ERA_FAIL_CODES = frozenset({"handshake.initialize_required", "handshake.version_unsupported"})
+_ERA_FAIL_CODES = frozenset(
+    {
+        "handshake.initialize_required",
+        "handshake.version_unsupported",
+        "handshake.version_unsupported_legacy",
+    }
+)
 # a 2xx that is not a JSON-RPC response: a web page, a REST API, a broken envelope
 _NOT_JSONRPC_CODE = "handshake.not_jsonrpc"
 # handshake inconclusive codes that do NOT block (era confirmed)
