@@ -21,7 +21,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.1                      # keep == ruff version in uv.lock / [dependency-groups].lint
+    rev: v0.17.3                      # keep == ruff version in uv.lock / [dependency-groups].lint
     hooks:
       - id: ruff-check                # (`ruff` id is a deprecated alias)
         args: [--fix, --exit-non-zero-on-fix]
